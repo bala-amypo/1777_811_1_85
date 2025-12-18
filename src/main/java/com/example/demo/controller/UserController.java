@@ -41,4 +41,12 @@ public class UserController {
 
     // LOGIN (basic, no JWT)
     @PostMapping("/login")
-    public AuthRespon
+    public AuthResponse login(@RequestBody LoginRequest request) {
+
+        AuthResponse response = new AuthResponse();
+        response.setEmail(request.getEmail());
+        response.setMessage("Login successful");
+
+        return response;
+    }
+}
