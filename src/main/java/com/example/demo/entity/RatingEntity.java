@@ -22,4 +22,6 @@ public class RatingEntity {
     public void onCreate() {
         ratedAt = LocalDateTime.now();
     }
+
+    // getters and setters
 }
