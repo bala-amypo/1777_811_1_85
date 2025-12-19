@@ -11,7 +11,7 @@ import com.example.demo.service.UserService;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    UserRepository repo;
+    private UserRepository repo;
 
     @Override
     public UserEntity register(UserEntity user) {
