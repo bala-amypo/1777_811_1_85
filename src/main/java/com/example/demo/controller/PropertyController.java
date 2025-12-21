@@ -1,33 +1,28 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.demo.entity.PropertyEntity;
 import com.example.demo.service.PropertyService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/properties")
 public class PropertyController {
 
-    private final PropertyService propertyService;
+    private final PropertyService service;
 
-    public PropertyController(PropertyService propertyService) {
-        this.propertyService = propertyService;
+    public PropertyController(PropertyService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public ResponseEntity<Property> addProperty(@RequestBody Property property) {
-        Property savedProperty = propertyService.addProperty(property);
-        return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
+    public PropertyEntity add(@RequestBody PropertyEntity property) {
+        return service.addProperty(property);
     }
 
     @GetMapping
-    public ResponseEntity<List<Property>> getAllProperties() {
-        List<Property> properties = propertyService.getAllProperties();
-        return ResponseEntity.ok(properties);
+    public List<PropertyEntity> getAll() {
+        return service.getAllProperties();
     }
 }
