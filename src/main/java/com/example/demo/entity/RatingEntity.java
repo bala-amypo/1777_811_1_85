@@ -12,14 +12,16 @@ public class RatingEntity {
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "property_id", nullable = false)
     private PropertyEntity property;
 
     private Double finalRating;
     private String ratingCategory;
+
     private LocalDateTime ratedAt;
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         ratedAt = LocalDateTime.now();
     }
 
@@ -31,5 +33,39 @@ public class RatingEntity {
         this.ratingCategory = ratingCategory;
     }
 
-    // getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public PropertyEntity getProperty() {
+        return property;
+    }
+
+    public void setProperty(PropertyEntity property) {
+        this.property = property;
+    }
+
+    public Double getFinalRating() {
+        return finalRating;
+    }
+
+    public void setFinalRating(Double finalRating) {
+        this.finalRating = finalRating;
+    }
+
+    public String getRatingCategory() {
+        return ratingCategory;
+    }
+
+    public void setRatingCategory(String ratingCategory) {
+        this.ratingCategory = ratingCategory;
+    }
+
+    public LocalDateTime getRatedAt() {
+        return ratedAt;
+    }
 }

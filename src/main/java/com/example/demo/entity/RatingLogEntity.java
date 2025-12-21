@@ -12,13 +12,14 @@ public class RatingLogEntity {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "property_id", nullable = false)
     private PropertyEntity property;
 
     private String message;
     private LocalDateTime loggedAt;
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         loggedAt = LocalDateTime.now();
     }
 
@@ -29,5 +30,31 @@ public class RatingLogEntity {
         this.message = message;
     }
 
-    // getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public PropertyEntity getProperty() {
+        return property;
+    }
+
+    public void setProperty(PropertyEntity property) {
+        this.property = property;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public LocalDateTime getLoggedAt() {
+        return loggedAt;
+    }
 }
