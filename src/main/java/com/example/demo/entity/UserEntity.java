@@ -23,6 +23,7 @@ public class UserEntity {
     private String role = "ANALYST";
 
     public UserEntity() {
+        
     }
 
     public UserEntity(Long id, String name, String email, String password, String role) {
