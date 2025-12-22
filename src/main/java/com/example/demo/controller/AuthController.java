@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.entity.UserEntity;
 import com.example.demo.service.UserService;
-
+ 
 @RestController
 public class AuthController {
 
