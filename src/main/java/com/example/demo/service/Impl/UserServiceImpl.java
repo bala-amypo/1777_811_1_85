@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
-
+ 
 @Service
 public class UserServiceImpl implements UserService {
 
