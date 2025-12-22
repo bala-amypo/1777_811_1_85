@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/scores")
 public class FacilityScoreController {
 
-    private final FacilityScoreService service;
+    @Autowired
+     FacilityScoreService service;
 
     public FacilityScoreController(FacilityScoreService service) {
         this.service = service;
