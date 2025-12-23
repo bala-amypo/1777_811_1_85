@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.PropertyEntity;
 import com.example.demo.service.PropertyService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,11 +11,8 @@ import java.util.List;
 @RequestMapping("/properties")
 public class PropertyController {
 
-    private final PropertyService service;
-
-    public PropertyController(PropertyService service) {
-        this.service = service;
-    }
+    @Autowired
+    private PropertyService service;
 
     @PostMapping
     public PropertyEntity add(@RequestBody PropertyEntity property) {

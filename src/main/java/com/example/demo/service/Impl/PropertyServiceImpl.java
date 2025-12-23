@@ -1,5 +1,4 @@
 package com.example.demo.service.impl;
-
 import com.example.demo.entity.PropertyEntity;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.repository.PropertyRepository;
