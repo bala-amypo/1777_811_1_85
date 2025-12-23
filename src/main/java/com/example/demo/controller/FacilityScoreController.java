@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+
+import org.springframework.beans.factory.annotation.Autowired;
 import com.example.demo.entity.FacilityScoreEntity;
 import com.example.demo.service.FacilityScoreService;
 import org.springframework.web.bind.annotation.*;
