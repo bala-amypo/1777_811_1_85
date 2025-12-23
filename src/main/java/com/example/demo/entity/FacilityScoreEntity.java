@@ -77,9 +77,5 @@ public class FacilityScoreEntity {
     public void setSafetyScore(Integer safetyScore) {
         this.safetyScore = safetyScore;
     }
-    public Integer getSchoolProximity() { return schoolProximity; }
-public Integer getHospitalProximity() { return hospitalProximity; }
-public Integer getTransportAccess() { return transportAccess; }
-public Integer getSafetyScore() { return safetyScore; }
 
 }

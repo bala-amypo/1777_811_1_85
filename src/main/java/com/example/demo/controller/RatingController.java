@@ -1,27 +1,20 @@
-package com.example.demo.controller;
-
-import com.example.demo.entity.RatingEntity;
-import com.example.demo.service.RatingService;
-import org.springframework.web.bind.annotation.*;
-
 @RestController
 @RequestMapping("/ratings")
 public class RatingController {
 
-    private final RatingService service;
+    private final RatingService ratingService;
 
-    public RatingController(RatingService service) {
-        this.service = service;
+    public RatingController(RatingService ratingService) {
+        this.ratingService = ratingService;
     }
 
-   @PostMapping("/generate/{propertyId}")
-public RatingEntity generateRating(@PathVariable Long propertyId) {
-    return ratingService.addRating(propertyId);
-}
-
+    @PostMapping("/generate/{propertyId}")
+    public RatingEntity generateRating(@PathVariable Long propertyId) {
+        return ratingService.addRating(propertyId);
+    }
 
     @GetMapping("/{propertyId}")
     public RatingEntity getRating(@PathVariable Long propertyId) {
-        return service.getRating(propertyId);
+        return ratingService.getRating(propertyId);
     }
 }
