@@ -4,7 +4,9 @@ import com.example.demo.entity.RatingEntity;
 
 public interface RatingService {
 
-    RatingEntity addRating(Long propertyId, RatingEntity rating);
+
+    RatingEntity addRating(Long propertyId);
+
 
     RatingEntity getRating(Long propertyId);
 }
