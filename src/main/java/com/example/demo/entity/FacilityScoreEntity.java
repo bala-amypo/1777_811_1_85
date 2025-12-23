@@ -13,7 +13,7 @@ public class FacilityScoreEntity {
     @OneToOne
     @JoinColumn(name = "property_id", nullable = false, unique = true)
     private PropertyEntity property;
-
+    
     private Integer schoolProximity;
     private Integer hospitalProximity;
     private Integer transportAccess;
@@ -77,4 +77,9 @@ public class FacilityScoreEntity {
     public void setSafetyScore(Integer safetyScore) {
         this.safetyScore = safetyScore;
     }
+    public Integer getSchoolProximity() { return schoolProximity; }
+public Integer getHospitalProximity() { return hospitalProximity; }
+public Integer getTransportAccess() { return transportAccess; }
+public Integer getSafetyScore() { return safetyScore; }
+
 }

@@ -14,11 +14,11 @@ public class RatingController {
         this.service = service;
     }
 
-    @PostMapping("/{propertyId}")
-    public RatingEntity addRating(@PathVariable Long propertyId,
-                                  @RequestBody RatingEntity rating) {
-        return service.addRating(propertyId, rating);
-    }
+   @PostMapping("/generate/{propertyId}")
+public RatingEntity generateRating(@PathVariable Long propertyId) {
+    return ratingService.addRating(propertyId);
+}
+
 
     @GetMapping("/{propertyId}")
     public RatingEntity getRating(@PathVariable Long propertyId) {
