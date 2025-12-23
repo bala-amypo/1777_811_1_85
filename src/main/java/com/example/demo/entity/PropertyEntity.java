@@ -21,7 +21,7 @@ public class PropertyEntity {
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
     private List<RatingLogEntity> ratingLogs;
 
-    // getters & setters
+    /
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
