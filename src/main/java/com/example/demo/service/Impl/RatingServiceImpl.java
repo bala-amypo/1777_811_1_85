@@ -1,32 +1,29 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.FacilityScoreEntity;
-import com.example.demo.entity.PropertyEntity;
-import com.example.demo.entity.RatingEntity;
+import com.example.demo.entity.*;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingRepository;
+import com.example.demo.repository.*;
 import com.example.demo.service.RatingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
-    private final RatingRepository ratingRepo;
-    private final PropertyRepository propertyRepo;
-    private final FacilityScoreRepository scoreRepo;
+    @Autowired
+    private RatingRepository ratingRepo;
 
-    public RatingServiceImpl(RatingRepository ratingRepo,
-                             PropertyRepository propertyRepo,
-                             FacilityScoreRepository scoreRepo) {
-        this.ratingRepo = ratingRepo;
-        this.propertyRepo = propertyRepo;
-        this.scoreRepo = scoreRepo;
-    }
+    @Autowired
+    private PropertyRepository propertyRepo;
+
+    @Autowired
+    private FacilityScoreRepository scoreRepo;
+
+    @Autowired
+    private RatingLogRepository logRepo;
 
     @Override
-    public RatingEntity addRating(Long propertyId) {
+    public RatingEntity generateRating(Long propertyId) {
 
         PropertyEntity property = propertyRepo.findById(propertyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
@@ -34,32 +31,34 @@ public class RatingServiceImpl implements RatingService {
         FacilityScoreEntity score = scoreRepo.findByProperty(property)
                 .orElseThrow(() -> new ResourceNotFoundException("Facility score not found"));
 
-        double average = (
-                score.getSchoolProximity() +
-                score.getHospitalProximity() +
-                score.getTransportAccess() +
-                score.getSafetyScore()
+        double avg = (
+                score.getSchoolProximity()
+              + score.getHospitalProximity()
+              + score.getTransportAccess()
+              + score.getSafetyScore()
         ) / 4.0;
 
-        double finalRating = average * 10;
+        double finalRating = avg * 10;
 
         String category;
-        if (finalRating < 40) {
-            category = "POOR";
-        } else if (finalRating < 60) {
-            category = "AVERAGE";
-        } else if (finalRating < 80) {
-            category = "GOOD";
-        } else {
-            category = "EXCELLENT";
-        }
+        if (finalRating >= 80) category = "EXCELLENT";
+        else if (finalRating >= 60) category = "GOOD";
+        else if (finalRating >= 40) category = "AVERAGE";
+        else category = "POOR";
 
         RatingEntity rating = new RatingEntity();
+        rating.setProperty(property);
         rating.setFinalRating(finalRating);
         rating.setRatingCategory(category);
-        rating.setProperty(property);
 
-        return ratingRepo.save(rating);
+        RatingEntity savedRating = ratingRepo.save(rating);
+
+        RatingLogEntity log = new RatingLogEntity();
+        log.setProperty(property);
+        log.setMessage("Rating generated successfully");
+        logRepo.save(log);
+
+        return savedRating;
     }
 
     @Override
