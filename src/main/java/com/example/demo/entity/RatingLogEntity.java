@@ -11,50 +11,26 @@ public class RatingLogEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "property_id", nullable = false)
-    private PropertyEntity property;
-
     private String message;
+
     private LocalDateTime loggedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "property_id")
+    private PropertyEntity property;
 
     @PrePersist
     public void onCreate() {
-        loggedAt = LocalDateTime.now();
+        this.loggedAt = LocalDateTime.now();
     }
 
-    public RatingLogEntity() {}
+    public Long getId() { return id; }
 
-    public RatingLogEntity(PropertyEntity property, String message) {
-        this.property = property;
-        this.message = message;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public Long getId() {
-        return id;
-    }
+    public LocalDateTime getLoggedAt() { return loggedAt; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public PropertyEntity getProperty() {
-        return property;
-    }
-
-    public void setProperty(PropertyEntity property) {
-        this.property = property;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public LocalDateTime getLoggedAt() {
-        return loggedAt;
-    }
+    public PropertyEntity getProperty() { return property; }
+    public void setProperty(PropertyEntity property) { this.property = property; }
 }

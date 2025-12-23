@@ -4,68 +4,37 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rating_results")
+@Table(name = "ratings")
 public class RatingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "property_id", nullable = false)
-    private PropertyEntity property;
-
     private Double finalRating;
     private String ratingCategory;
 
     private LocalDateTime ratedAt;
 
+    @OneToOne
+    @JoinColumn(name = "property_id")
+    private PropertyEntity property;
+
     @PrePersist
     public void onCreate() {
-        ratedAt = LocalDateTime.now();
+        this.ratedAt = LocalDateTime.now();
     }
 
-    public RatingEntity() {}
+    public Long getId() { return id; }
 
-    public RatingEntity(PropertyEntity property, Double finalRating, String ratingCategory) {
-        this.property = property;
-        this.finalRating = finalRating;
-        this.ratingCategory = ratingCategory;
-    }
+    public Double getFinalRating() { return finalRating; }
+    public void setFinalRating(Double finalRating) { this.finalRating = finalRating; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getRatingCategory() { return ratingCategory; }
+    public void setRatingCategory(String ratingCategory) { this.ratingCategory = ratingCategory; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDateTime getRatedAt() { return ratedAt; }
 
-    public PropertyEntity getProperty() {
-        return property;
-    }
-
-    public void setProperty(PropertyEntity property) {
-        this.property = property;
-    }
-
-    public Double getFinalRating() {
-        return finalRating;
-    }
-
-    public void setFinalRating(Double finalRating) {
-        this.finalRating = finalRating;
-    }
-
-    public String getRatingCategory() {
-        return ratingCategory;
-    }
-
-    public void setRatingCategory(String ratingCategory) {
-        this.ratingCategory = ratingCategory;
-    }
-
-    public LocalDateTime getRatedAt() {
-        return ratedAt;
-    }
+    public PropertyEntity getProperty() { return property; }
+    public void setProperty(PropertyEntity property) { this.property = property; }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "properties")
@@ -16,61 +17,28 @@ public class PropertyEntity {
     private Double price;
     private Double areaSqFt;
 
-    public PropertyEntity() {}
+    @OneToOne(mappedBy = "property", cascade = CascadeType.ALL)
+    private RatingEntity rating;
 
-    public PropertyEntity(String title, String address, String city, Double price, Double areaSqFt) {
-        this.title = title;
-        this.address = address;
-        this.city = city;
-        this.price = price;
-        this.areaSqFt = areaSqFt;
-    }
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
+    private List<RatingLogEntity> ratingLogs;
 
-    public Long getId() {
-        return id;
-    }
+    // getters & setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-    public String getAddress() {
-        return address;
-    }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Double getAreaSqFt() {
-        return areaSqFt;
-    }
-
-    public void setAreaSqFt(Double areaSqFt) {
-        this.areaSqFt = areaSqFt;
-    }
+    public Double getAreaSqFt() { return areaSqFt; }
+    public void setAreaSqFt(Double areaSqFt) { this.areaSqFt = areaSqFt; }
 }
