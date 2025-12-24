@@ -1,4 +1,5 @@
 package com.example.demo.service.impl;
+
 import com.example.demo.entity.PropertyEntity;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.repository.PropertyRepository;
@@ -16,7 +17,6 @@ public class PropertyServiceImpl implements PropertyService {
         this.repository = repository;
     }
 
-    @Override
     public PropertyEntity addProperty(PropertyEntity property) {
         if (property.getPrice() < 0)
             throw new BadRequestException("Price must be >= 0");
@@ -27,7 +27,6 @@ public class PropertyServiceImpl implements PropertyService {
         return repository.save(property);
     }
 
-    @Override
     public List<PropertyEntity> getAllProperties() {
         return repository.findAll();
     }
