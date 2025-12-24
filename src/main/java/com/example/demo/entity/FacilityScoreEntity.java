@@ -3,35 +3,65 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 
 @Entity
-public class PropertyEntity {
+public class FacilityScoreEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
-    private String address;
-    private String city;
-    private double price;
-    private double areaSqFt;
+    @OneToOne
+    @JoinColumn(name = "property_id")
+    private PropertyEntity property;
 
-    public PropertyEntity() {}
+    private int schoolProximity;
+    private int hospitalProximity;
+    private int transportAccess;
+    private int safetyScore;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public FacilityScoreEntity() {
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public PropertyEntity getProperty() {
+        return property;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setProperty(PropertyEntity property) {
+        this.property = property;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public int getSchoolProximity() {
+        return schoolProximity;
+    }
 
-    public double getAreaSqFt() { return areaSqFt; }
-    public void setAreaSqFt(double areaSqFt) { this.areaSqFt = areaSqFt; }
+    public void setSchoolProximity(int schoolProximity) {
+        this.schoolProximity = schoolProximity;
+    }
+
+    public int getHospitalProximity() {
+        return hospitalProximity;
+    }
+
+    public void setHospitalProximity(int hospitalProximity) {
+        this.hospitalProximity = hospitalProximity;
+    }
+
+    public int getTransportAccess() {
+        return transportAccess;
+    }
+
+    public void setTransportAccess(int transportAccess) {
+        this.transportAccess = transportAccess;
+    }
+
+    public int getSafetyScore() {
+        return safetyScore;
+    }
+
+    public void setSafetyScore(int safetyScore) {
+        this.safetyScore = safetyScore;
+    }
 }

@@ -15,23 +15,54 @@ public class PropertyEntity {
     private double price;
     private double areaSqFt;
 
-    public PropertyEntity() {}
+    public PropertyEntity() {
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public String getAddress() {
+        return address;
+    }
 
-    public double getAreaSqFt() { return areaSqFt; }
-    public void setAreaSqFt(double areaSqFt) { this.areaSqFt = areaSqFt; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getAreaSqFt() {
+        return areaSqFt;
+    }
+
+    public void setAreaSqFt(double areaSqFt) {
+        this.areaSqFt = areaSqFt;
+    }
 }
