@@ -14,46 +14,23 @@ public class RatingEntity {
     @JoinColumn(name = "property_id")
     private PropertyEntity property;
 
-    private Double finalRating;
-
+    private double finalRating;
     private String ratingCategory;
-
     private LocalDateTime ratedAt;
 
     @PrePersist
     public void onCreate() {
-        this.ratedAt = LocalDateTime.now();
+        ratedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public RatingEntity() {}
 
-    public PropertyEntity getProperty() {
-        return property;
-    }
+    public void setProperty(PropertyEntity property) { this.property = property; }
+    public PropertyEntity getProperty() { return property; }
 
-    public void setProperty(PropertyEntity property) {
-        this.property = property;
-    }
+    public double getFinalRating() { return finalRating; }
+    public void setFinalRating(double finalRating) { this.finalRating = finalRating; }
 
-    public Double getFinalRating() {
-        return finalRating;
-    }
-
-    public void setFinalRating(Double finalRating) {
-        this.finalRating = finalRating;
-    }
-
-    public String getRatingCategory() {
-        return ratingCategory;
-    }
-
-    public void setRatingCategory(String ratingCategory) {
-        this.ratingCategory = ratingCategory;
-    }
-
-    public LocalDateTime getRatedAt() {
-        return ratedAt;
-    }
+    public String getRatingCategory() { return ratingCategory; }
+    public void setRatingCategory(String ratingCategory) { this.ratingCategory = ratingCategory; }
 }

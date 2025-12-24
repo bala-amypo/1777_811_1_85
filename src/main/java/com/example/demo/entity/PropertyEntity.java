@@ -1,27 +1,22 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
-@Table(name = "properties")
 public class PropertyEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String title;
     private String address;
     private String city;
-    private Double price;
-    private Double areaSqFt;
+    private double price;
+    private double areaSqFt;
 
-    @OneToOne(mappedBy = "property", cascade = CascadeType.ALL)
-    private RatingEntity rating;
+    public PropertyEntity() {}
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
-    private List<RatingLogEntity> ratingLogs;
-
-    /
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -34,9 +29,9 @@ public class PropertyEntity {
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public Double getAreaSqFt() { return areaSqFt; }
-    public void setAreaSqFt(Double areaSqFt) { this.areaSqFt = areaSqFt; }
+    public double getAreaSqFt() { return areaSqFt; }
+    public void setAreaSqFt(double areaSqFt) { this.areaSqFt = areaSqFt; }
 }
