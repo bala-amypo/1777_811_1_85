@@ -6,6 +6,8 @@ import java.util.Optional;
 
 public interface PropertyRepository {
 
+    PropertyEntity save(PropertyEntity property);
+
     Optional<PropertyEntity> findById(Long id);
 
     List<PropertyEntity> findAll();
