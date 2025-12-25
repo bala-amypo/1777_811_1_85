@@ -1,24 +1,41 @@
 package com.example.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.RegisterRequest;
+import com.example.demo.entity.UserEntity;
+import com.example.demo.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.entity.UserEntity;
-import com.example.demo.service.UserService;
- 
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    UserService ser;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public AuthController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/register")
-    public UserEntity register(@RequestBody UserEntity user) {
-        return ser.register(user);
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+
+        UserEntity user = new UserEntity();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole("ROLE_ANALYST");
+
+        userRepository.save(user);
+
+        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public UserEntity login(@RequestBody UserEntity user) {
-        return ser.findByEmail(user.getEmail());
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok("Login successful");
     }
 }

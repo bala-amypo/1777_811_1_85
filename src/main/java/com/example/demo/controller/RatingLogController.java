@@ -1,7 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.PropertyEntity;
 import com.example.demo.entity.RatingLogEntity;
-import com.example.demo.service.RatingLogService;
+import com.example.demo.repository.PropertyRepository;
+import com.example.demo.repository.RatingLogRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,20 +14,35 @@ import java.util.List;
 @RequestMapping("/logs")
 public class RatingLogController {
 
-    private final RatingLogService service;
+    private final RatingLogRepository ratingLogRepository;
+    private final PropertyRepository propertyRepository;
 
-    public RatingLogController(RatingLogService service) {
-        this.service = service;
+    public RatingLogController(RatingLogRepository ratingLogRepository,
+                               PropertyRepository propertyRepository) {
+        this.ratingLogRepository = ratingLogRepository;
+        this.propertyRepository = propertyRepository;
     }
 
     @PostMapping("/{propertyId}")
-    public RatingLogEntity addLog(@PathVariable Long propertyId,
-                                  @RequestBody String message) {
-        return service.addLog(propertyId, message);
+    public ResponseEntity<RatingLogEntity> addLog(
+            @PathVariable Long propertyId,
+            @RequestBody RatingLogEntity log) {
+
+        PropertyEntity property = propertyRepository.findById(propertyId).orElse(null);
+        if (property == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        log.setProperty(property);
+        RatingLogEntity savedLog = ratingLogRepository.save(log);
+
+        return new ResponseEntity<>(savedLog, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{propertyId}")
-    public List<RatingLogEntity> getLogs(@PathVariable Long propertyId) {
-        return service.getLogsByProperty(propertyId);
+    @GetMapping("/property/{propertyId}")
+    public ResponseEntity<List<RatingLogEntity>> getLogs(@PathVariable Long propertyId) {
+        return ResponseEntity.ok(
+                ratingLogRepository.findByPropertyIdOrderByLoggedAtDesc(propertyId)
+        );
     }
 }

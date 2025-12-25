@@ -1,7 +1,6 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.entity.PropertyEntity;
-import com.example.demo.exception.BadRequestException;
 import com.example.demo.repository.PropertyRepository;
 import com.example.demo.service.PropertyService;
 import org.springframework.stereotype.Service;
@@ -11,23 +10,24 @@ import java.util.List;
 @Service
 public class PropertyServiceImpl implements PropertyService {
 
-    private final PropertyRepository repository;
+    private final PropertyRepository propertyRepository;
 
-    public PropertyServiceImpl(PropertyRepository repository) {
-        this.repository = repository;
+    public PropertyServiceImpl(PropertyRepository propertyRepository) {
+        this.propertyRepository = propertyRepository;
     }
 
-    public PropertyEntity addProperty(PropertyEntity property) {
-        if (property.getPrice() < 0)
-            throw new BadRequestException("Price must be >= 0");
-
-        if (property.getAreaSqFt() < 100)
-            throw new BadRequestException("Area must be >= 100");
-
-        return repository.save(property);
+    @Override
+    public PropertyEntity createProperty(PropertyEntity property) {
+        return propertyRepository.save(property);
     }
 
+    @Override
+    public PropertyEntity getPropertyById(Long id) {
+        return propertyRepository.findById(id).orElse(null);
+    }
+
+    @Override
     public List<PropertyEntity> getAllProperties() {
-        return repository.findAll();
+        return propertyRepository.findAll();
     }
 }
