@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface RatingLogService {
 
-    RatingLogEntity addLog(Long propertyId, String message);
+    RatingLogEntity saveLog(RatingLogEntity log);
 
-    List<RatingLogEntity> getLogsByProperty(Long propertyId);
+    List<RatingLogEntity> getLogsByPropertyId(Long propertyId);
 }

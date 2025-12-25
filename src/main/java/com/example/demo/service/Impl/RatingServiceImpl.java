@@ -1,73 +1,58 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.*;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.*;
+import com.example.demo.entity.FacilityScoreEntity;
+import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.RatingEntity;
+import com.example.demo.repository.FacilityScoreRepository;
+import com.example.demo.repository.PropertyRepository;
+import com.example.demo.repository.RatingRepository;
 import com.example.demo.service.RatingService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.util.RatingCalculatorUtil;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
-    @Autowired
-    private RatingRepository ratingRepo;
+    private final PropertyRepository propertyRepository;
+    private final FacilityScoreRepository facilityScoreRepository;
+    private final RatingRepository ratingRepository;
 
-    @Autowired
-    private PropertyRepository propertyRepo;
-
-    @Autowired
-    private FacilityScoreRepository scoreRepo;
-
-    @Autowired
-    private RatingLogRepository logRepo;
+    public RatingServiceImpl(PropertyRepository propertyRepository,
+                             FacilityScoreRepository facilityScoreRepository,
+                             RatingRepository ratingRepository) {
+        this.propertyRepository = propertyRepository;
+        this.facilityScoreRepository = facilityScoreRepository;
+        this.ratingRepository = ratingRepository;
+    }
 
     @Override
     public RatingEntity generateRating(Long propertyId) {
 
-        PropertyEntity property = propertyRepo.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
+        PropertyEntity property = propertyRepository.findById(propertyId).orElse(null);
+        if (property == null) {
+            return null;
+        }
 
-        FacilityScoreEntity score = scoreRepo.findByProperty(property)
-                .orElseThrow(() -> new ResourceNotFoundException("Facility score not found"));
+        FacilityScoreEntity score = facilityScoreRepository
+                .findTopByPropertyIdOrderBySubmittedAtDesc(propertyId)
+                .orElse(null);
 
-        double avg = (
-                score.getSchoolProximity()
-              + score.getHospitalProximity()
-              + score.getTransportAccess()
-              + score.getSafetyScore()
-        ) / 4.0;
+        if (score == null) {
+            return null;
+        }
 
-        double finalRating = avg * 10;
-
-        String category;
-        if (finalRating >= 80) category = "EXCELLENT";
-        else if (finalRating >= 60) category = "GOOD";
-        else if (finalRating >= 40) category = "AVERAGE";
-        else category = "POOR";
+        double finalScore = RatingCalculatorUtil.calculate(
+                score.getSchoolProximity(),
+                score.getHospitalProximity(),
+                score.getTransportAccess(),
+                score.getSafetyScore()
+        );
 
         RatingEntity rating = new RatingEntity();
         rating.setProperty(property);
-        rating.setFinalRating(finalRating);
-        rating.setRatingCategory(category);
+        rating.setFinalRating(finalScore);
+        rating.setRatingCategory(RatingCalculatorUtil.category(finalScore));
 
-        RatingEntity savedRating = ratingRepo.save(rating);
-
-        RatingLogEntity log = new RatingLogEntity();
-        log.setProperty(property);
-        log.setMessage("Rating generated successfully");
-        logRepo.save(log);
-
-        return savedRating;
-    }
-
-    @Override
-    public RatingEntity getRating(Long propertyId) {
-
-        PropertyEntity property = propertyRepo.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
-
-        return ratingRepo.findByProperty(property)
-                .orElseThrow(() -> new ResourceNotFoundException("Rating not found"));
+        return ratingRepository.save(rating);
     }
 }

@@ -4,7 +4,7 @@ import com.example.demo.entity.FacilityScoreEntity;
 
 public interface FacilityScoreService {
 
-    FacilityScoreEntity addScore(Long propertyId, FacilityScoreEntity score);
+    FacilityScoreEntity submitScore(Long propertyId, FacilityScoreEntity score);
 
-    FacilityScoreEntity getScoreByProperty(Long propertyId);
+    FacilityScoreEntity getLatestScore(Long propertyId);
 }
