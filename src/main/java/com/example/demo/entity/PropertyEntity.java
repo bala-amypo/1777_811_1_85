@@ -1,22 +1,35 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
 
 @Entity
+@Table(name = "properties")
 public class PropertyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String title;
-    private String address;
-    private String city;
-    private double price;
-    private double areaSqFt;
 
-    public PropertyEntity() {
-    }
+    private String address;
+
+    @NotBlank
+    private String city;
+
+    @NotNull
+    @DecimalMin("0.01")
+    private BigDecimal price;
+
+    @NotNull
+    @Min(100)
+    private Double areaSqFt;
+
+    // ===== Getters & Setters =====
 
     public Long getId() {
         return id;
@@ -50,19 +63,19 @@ public class PropertyEntity {
         this.city = city;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public double getAreaSqFt() {
+    public Double getAreaSqFt() {
         return areaSqFt;
     }
 
-    public void setAreaSqFt(double areaSqFt) {
+    public void setAreaSqFt(Double areaSqFt) {
         this.areaSqFt = areaSqFt;
     }
 }

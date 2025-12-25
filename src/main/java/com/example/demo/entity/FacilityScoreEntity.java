@@ -1,28 +1,48 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "facility_scores")
 public class FacilityScoreEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "property_id")
     private PropertyEntity property;
 
-    private int schoolProximity;
-    private int hospitalProximity;
-    private int transportAccess;
-    private int safetyScore;
+    @Min(0)
+    @Max(10)
+    private Integer schoolProximity;
 
-    public FacilityScoreEntity() {
-    }
+    @Min(0)
+    @Max(10)
+    private Integer hospitalProximity;
+
+    @Min(0)
+    @Max(10)
+    private Integer transportAccess;
+
+    @Min(0)
+    @Max(10)
+    private Integer safetyScore;
+
+    private LocalDateTime submittedAt = LocalDateTime.now();
+
+    // ===== Getters & Setters =====
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public PropertyEntity getProperty() {
@@ -33,35 +53,43 @@ public class FacilityScoreEntity {
         this.property = property;
     }
 
-    public int getSchoolProximity() {
+    public Integer getSchoolProximity() {
         return schoolProximity;
     }
 
-    public void setSchoolProximity(int schoolProximity) {
+    public void setSchoolProximity(Integer schoolProximity) {
         this.schoolProximity = schoolProximity;
     }
 
-    public int getHospitalProximity() {
+    public Integer getHospitalProximity() {
         return hospitalProximity;
     }
 
-    public void setHospitalProximity(int hospitalProximity) {
+    public void setHospitalProximity(Integer hospitalProximity) {
         this.hospitalProximity = hospitalProximity;
     }
 
-    public int getTransportAccess() {
+    public Integer getTransportAccess() {
         return transportAccess;
     }
 
-    public void setTransportAccess(int transportAccess) {
+    public void setTransportAccess(Integer transportAccess) {
         this.transportAccess = transportAccess;
     }
 
-    public int getSafetyScore() {
+    public Integer getSafetyScore() {
         return safetyScore;
     }
 
-    public void setSafetyScore(int safetyScore) {
+    public void setSafetyScore(Integer safetyScore) {
         this.safetyScore = safetyScore;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
     }
 }
