@@ -3,8 +3,8 @@ package com.example.demo.entity;
 public class RatingEntity {
 
     private Long id;
-    private double rating;
-    private String category;
+    private double finalRating;
+    private String ratingCategory;
     private PropertyEntity property;
 
     public RatingEntity() {
@@ -18,20 +18,20 @@ public class RatingEntity {
         this.id = id;
     }
 
-    public double getRating() {
-        return rating;
+    public double getFinalRating() {
+        return finalRating;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setFinalRating(double finalRating) {
+        this.finalRating = finalRating;
     }
 
-    public String getCategory() {
-        return category;
+    public String getRatingCategory() {
+        return ratingCategory;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setRatingCategory(String ratingCategory) {
+        this.ratingCategory = ratingCategory;
     }
 
     public PropertyEntity getProperty() {
