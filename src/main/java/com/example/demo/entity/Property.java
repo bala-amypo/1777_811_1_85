@@ -1,35 +1,10 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+public class Property {
 
-import java.math.BigDecimal;
-
-@Entity
-@Table(name = "properties")
-public class PropertyEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank
-    private String title;
-
-    private String address;
-
-    @NotBlank
     private String city;
-
-    @NotNull
-    @DecimalMin("0.01")
-    private BigDecimal price;
-
-    @NotNull
-    @Min(100)
-    private Double areaSqFt;
-
-    // ===== Getters & Setters =====
+    private double baseScore;
 
     public Long getId() {
         return id;
@@ -37,22 +12,6 @@ public class PropertyEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getCity() {
@@ -63,19 +22,11 @@ public class PropertyEntity {
         this.city = city;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public double getBaseScore() {
+        return baseScore;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Double getAreaSqFt() {
-        return areaSqFt;
-    }
-
-    public void setAreaSqFt(Double areaSqFt) {
-        this.areaSqFt = areaSqFt;
+    public void setBaseScore(double baseScore) {
+        this.baseScore = baseScore;
     }
 }
