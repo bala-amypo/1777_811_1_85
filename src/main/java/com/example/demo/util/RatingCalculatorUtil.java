@@ -6,7 +6,13 @@ public class RatingCalculatorUtil {
         return baseScore + facilityScore;
     }
 
-    public static double calculateFacilityScore(int count) {
-        return count * 0.5;
+    public static String category(double rating) {
+        if (rating >= 8) {
+            return "EXCELLENT";
+        } else if (rating >= 5) {
+            return "GOOD";
+        } else {
+            return "AVERAGE";
+        }
     }
 }

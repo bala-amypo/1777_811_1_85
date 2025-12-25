@@ -3,8 +3,12 @@ package com.example.demo.entity;
 public class FacilityScoreEntity {
 
     private Long id;
-    private int count;
-    private double score;
+
+    private double schoolProximity;
+    private double hospitalProximity;
+    private double transportAccess;
+    private double safetyScore;
+
     private PropertyEntity property;
 
     public FacilityScoreEntity() {
@@ -18,20 +22,36 @@ public class FacilityScoreEntity {
         this.id = id;
     }
 
-    public int getCount() {
-        return count;
+    public double getSchoolProximity() {
+        return schoolProximity;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setSchoolProximity(double schoolProximity) {
+        this.schoolProximity = schoolProximity;
     }
 
-    public double getScore() {
-        return score;
+    public double getHospitalProximity() {
+        return hospitalProximity;
     }
 
-    public void setScore(double score) {
-        this.score = score;
+    public void setHospitalProximity(double hospitalProximity) {
+        this.hospitalProximity = hospitalProximity;
+    }
+
+    public double getTransportAccess() {
+        return transportAccess;
+    }
+
+    public void setTransportAccess(double transportAccess) {
+        this.transportAccess = transportAccess;
+    }
+
+    public double getSafetyScore() {
+        return safetyScore;
+    }
+
+    public void setSafetyScore(double safetyScore) {
+        this.safetyScore = safetyScore;
     }
 
     public PropertyEntity getProperty() {
