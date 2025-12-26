@@ -1,10 +1,30 @@
-package com.example.demo.service;
+package com.example.demo.service.impl;
 
-import com.example.demo.entity.FacilityScoreEntity;
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
+import com.example.demo.repository.FacilityScoreRepository;
+import com.example.demo.service.FacilityScoreService;
+import org.springframework.stereotype.Service;
 
-public interface FacilityScoreService {
+import java.util.Optional;
 
-    FacilityScoreEntity submitScore(Long propertyId, FacilityScoreEntity score);
+@Service
+public class FacilityScoreServiceImpl implements FacilityScoreService {
 
-    FacilityScoreEntity getLatestScore(Long propertyId);
+    private final FacilityScoreRepository repository;
+
+    public FacilityScoreServiceImpl(FacilityScoreRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public FacilityScore createScore(Property property, FacilityScore score) {
+        score.setProperty(property);
+        return repository.save(score);
+    }
+
+    @Override
+    public Optional<FacilityScore> getScoreByProperty(Property property) {
+        return repository.findByProperty(property);
+    }
 }
