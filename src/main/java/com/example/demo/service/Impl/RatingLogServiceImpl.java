@@ -1,9 +1,8 @@
-package com.example.demo.service.impl;
+package com.example.demo.service;
 
-import com.example.demo.entity.Property;
-import com.example.demo.entity.RatingLog;
-import com.example.demo.repository.RatingLogRepository;
-import com.example.demo.service.RatingLogService;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,22 +10,28 @@ import java.util.List;
 @Service
 public class RatingLogServiceImpl implements RatingLogService {
 
-    private final RatingLogRepository repository;
+    @Autowired
+    private PropertyRepository propertyRepository;
 
-    public RatingLogServiceImpl(RatingLogRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private RatingLogRepository ratingLogRepository;
 
     @Override
-    public RatingLog addLog(Property property, String message) {
+    public RatingLog addLog(Long propertyId, String message) {
+
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+
         RatingLog log = new RatingLog();
         log.setProperty(property);
         log.setMessage(message);
-        return repository.save(log);
+
+        return ratingLogRepository.save(log);
     }
 
     @Override
-    public List<RatingLog> getLogs(Property property) {
-        return repository.findByProperty(property);
+    public List<RatingLog> getLogsByProperty(Long propertyId) {
+
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        return ratingLogRepository.findByProperty(property);
     }
 }

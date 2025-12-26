@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Property;
-import com.example.demo.repository.PropertyRepository;
+import com.example.demo.service.PropertyService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -14,16 +14,16 @@ import java.util.List;
 public class PropertyController {
 
     @Autowired
-    private PropertyRepository propertyRepository;
+    private PropertyService propertyService;
 
     @PostMapping
-    public ResponseEntity<Property> createProperty(@Valid @RequestBody Property property) {
-        Property saved = propertyRepository.save(property);
+    public ResponseEntity<Property> addProperty(@Valid @RequestBody Property property) {
+        Property saved = propertyService.addProperty(property);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<Property>> getAllProperties() {
-        return ResponseEntity.ok(propertyRepository.findAll());
+        return ResponseEntity.ok(propertyService.getAllProperties());
     }
 }

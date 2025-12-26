@@ -1,42 +1,49 @@
-package com.example.demo.service.impl;
+package com.example.demo.service;
 
-import com.example.demo.entity.FacilityScore;
-import com.example.demo.entity.Property;
-import com.example.demo.entity.RatingResult;
-import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.RatingResultRepository;
-import com.example.demo.service.RatingService;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
-    private final FacilityScoreRepository scoreRepository;
-    private final RatingResultRepository ratingResultRepository;
+    @Autowired
+    private PropertyRepository propertyRepository;
 
-    public RatingServiceImpl(FacilityScoreRepository scoreRepository,
-                             RatingResultRepository ratingResultRepository) {
-        this.scoreRepository = scoreRepository;
-        this.ratingResultRepository = ratingResultRepository;
+    @Autowired
+    private FacilityScoreRepository facilityScoreRepository;
+
+    @Autowired
+    private RatingResultRepository ratingResultRepository;
+
+    @Override
+    public RatingResult generateRating(Long propertyId) {
+
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        FacilityScore fs = facilityScoreRepository.findByProperty(property).orElseThrow();
+
+        double avg = (fs.getSchoolProximity()
+                + fs.getHospitalProximity()
+                + fs.getTransportAccess()
+                + fs.getSafetyScore()) / 4.0;
+
+        RatingResult result = new RatingResult();
+        result.setProperty(property);
+        result.setFinalRating(avg);
+
+        if (avg >= 8) result.setRatingCategory("EXCELLENT");
+        else if (avg >= 6) result.setRatingCategory("GOOD");
+        else if (avg >= 4) result.setRatingCategory("AVERAGE");
+        else result.setRatingCategory("POOR");
+
+        return ratingResultRepository.save(result);
     }
 
     @Override
-    public RatingResult generateRating(Property property) {
+    public RatingResult getRating(Long propertyId) {
 
-        FacilityScore s = scoreRepository.findByProperty(property).orElseThrow();
-
-        double avg = (s.getSchoolProximity()
-                + s.getHospitalProximity()
-                + s.getTransportAccess()
-                + s.getSafetyScore()) / 4.0;
-
-        RatingResult rr = new RatingResult();
-        rr.setProperty(property);
-        rr.setFinalRating(avg);
-        rr.setRatingCategory(avg >= 8 ? "EXCELLENT" :
-                             avg >= 6 ? "GOOD" :
-                             avg >= 4 ? "AVERAGE" : "POOR");
-
-        return ratingResultRepository.save(rr);
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        return ratingResultRepository.findByProperty(property).orElse(null);
     }
 }
