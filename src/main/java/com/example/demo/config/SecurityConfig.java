@@ -56,6 +56,16 @@ public class SecurityConfig {
                     jwtAuthenticationFilter,
                     UsernamePasswordAuthenticationFilter.class
             );
+            http
+    .exceptionHandling(ex -> ex
+        .authenticationEntryPoint((request, response, authException) -> {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        })
+        .accessDeniedHandler((request, response, accessDeniedException) -> {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        })
+    );
+
 
         return http.build();
     }
