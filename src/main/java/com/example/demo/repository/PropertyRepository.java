@@ -1,14 +1,15 @@
 package com.example.demo.repository;
 
-import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.Property;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.List;
-import java.util.Optional;
 
-public interface PropertyRepository {
+public interface PropertyRepository extends JpaRepository<Property, Long> {
 
-    PropertyEntity save(PropertyEntity property);
+    List<Property> findByCity(String city);
 
-    Optional<PropertyEntity> findById(Long id);
-
-    List<PropertyEntity> findAll();
+    @Query("select p from Property p where p.city = :city")
+    List<Property> findByCityHql(String city);
 }

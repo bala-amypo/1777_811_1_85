@@ -1,8 +1,12 @@
 package com.example.demo.repository;
 
+import com.example.demo.entity.Property;
 import com.example.demo.entity.RatingResult;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RatingResultRepository {
+import java.util.Optional;
 
-    RatingResult save(RatingResult ratingResult);
+public interface RatingResultRepository extends JpaRepository<RatingResult, Long> {
+
+    Optional<RatingResult> findByProperty(Property property);
 }
