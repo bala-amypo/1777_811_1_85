@@ -2,11 +2,9 @@ package com.example.demo.service;
 
 import com.example.demo.entity.FacilityScore;
 
-import java.util.Optional;
-
 public interface FacilityScoreService {
 
-    Optional<FacilityScore> getByPropertyId(Long propertyId);
+    FacilityScore addScore(Long propertyId, FacilityScore score);
 
-    FacilityScore save(FacilityScore score);
+    FacilityScore getScoreByProperty(Long propertyId);
 }

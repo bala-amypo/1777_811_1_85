@@ -1,28 +1,36 @@
-package com.example.demo.service.impl;
+package com.example.demo.service;
 
-import com.example.demo.entity.FacilityScore;
-import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.service.FacilityScoreService;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class FacilityScoreServiceImpl implements FacilityScoreService {
 
-    private final FacilityScoreRepository repository;
+    @Autowired
+    private PropertyRepository propertyRepository;
 
-    public FacilityScoreServiceImpl(FacilityScoreRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private FacilityScoreRepository facilityScoreRepository;
+
+    @Override
+    public FacilityScore addScore(Long propertyId, FacilityScore score) {
+
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+
+        if (facilityScoreRepository.findByProperty(property).isPresent()) {
+            throw new RuntimeException("Score already exists");
+        }
+
+        score.setProperty(property);
+        return facilityScoreRepository.save(score);
     }
 
     @Override
-    public Optional<FacilityScore> getByPropertyId(Long propertyId) {
-        return repository.findByPropertyId(propertyId);
-    }
+    public FacilityScore getScoreByProperty(Long propertyId) {
 
-    @Override
-    public FacilityScore save(FacilityScore score) {
-        return repository.save(score);
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        return facilityScoreRepository.findByProperty(property).orElse(null);
     }
 }

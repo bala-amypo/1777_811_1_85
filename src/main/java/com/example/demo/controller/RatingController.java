@@ -1,47 +1,53 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Property;
-import com.example.demo.entity.RatingResult;
-import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingResultRepository;
-import com.example.demo.service.RatingService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/ratings")
 public class RatingController {
 
-    private final RatingService ratingService;
-    private final PropertyRepository propertyRepository;
-    private final RatingResultRepository ratingResultRepository;
+    @Autowired
+    private PropertyRepository propertyRepository;
 
-    public RatingController(RatingService ratingService,
-                            PropertyRepository propertyRepository,
-                            RatingResultRepository ratingResultRepository) {
-        this.ratingService = ratingService;
-        this.propertyRepository = propertyRepository;
-        this.ratingResultRepository = ratingResultRepository;
-    }
+    @Autowired
+    private FacilityScoreRepository facilityScoreRepository;
+
+    @Autowired
+    private RatingResultRepository ratingResultRepository;
 
     @PostMapping("/generate/{propertyId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RatingResult> generate(@PathVariable Long propertyId) {
+    public ResponseEntity<RatingResult> generateRating(@PathVariable Long propertyId) {
 
         Property property = propertyRepository.findById(propertyId).orElseThrow();
-        RatingResult rr = ratingService.generateRating(property);
+        FacilityScore fs = facilityScoreRepository.findByProperty(property).orElseThrow();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(rr);
+        double avg = (fs.getSchoolProximity()
+                + fs.getHospitalProximity()
+                + fs.getTransportAccess()
+                + fs.getSafetyScore()) / 4.0;
+
+        RatingResult result = new RatingResult();
+        result.setProperty(property);
+        result.setFinalRating(avg);
+
+        if (avg >= 8) result.setRatingCategory("EXCELLENT");
+        else if (avg >= 6) result.setRatingCategory("GOOD");
+        else if (avg >= 4) result.setRatingCategory("AVERAGE");
+        else result.setRatingCategory("POOR");
+
+        ratingResultRepository.save(result);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @GetMapping("/property/{propertyId}")
-    public ResponseEntity<RatingResult> getByProperty(@PathVariable Long propertyId) {
+    public ResponseEntity<RatingResult> getRating(@PathVariable Long propertyId) {
 
         Property property = propertyRepository.findById(propertyId).orElseThrow();
-        return ResponseEntity.ok(
-                ratingResultRepository.findByProperty(property).orElseThrow()
-        );
+        RatingResult result = ratingResultRepository.findByProperty(property).orElseThrow();
+        return ResponseEntity.ok(result);
     }
 }
