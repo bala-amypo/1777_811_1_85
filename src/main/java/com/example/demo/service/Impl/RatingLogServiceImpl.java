@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.RatingLogEntity;
+import com.example.demo.entity.Property;
+import com.example.demo.entity.RatingLog;
 import com.example.demo.repository.RatingLogRepository;
 import com.example.demo.service.RatingLogService;
 import org.springframework.stereotype.Service;
@@ -10,19 +11,22 @@ import java.util.List;
 @Service
 public class RatingLogServiceImpl implements RatingLogService {
 
-    private final RatingLogRepository ratingLogRepository;
+    private final RatingLogRepository repository;
 
-    public RatingLogServiceImpl(RatingLogRepository ratingLogRepository) {
-        this.ratingLogRepository = ratingLogRepository;
+    public RatingLogServiceImpl(RatingLogRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    public RatingLogEntity saveLog(RatingLogEntity log) {
-        return ratingLogRepository.save(log);
+    public RatingLog addLog(Property property, String message) {
+        RatingLog log = new RatingLog();
+        log.setProperty(property);
+        log.setMessage(message);
+        return repository.save(log);
     }
 
     @Override
-    public List<RatingLogEntity> getLogsByPropertyId(Long propertyId) {
-        return ratingLogRepository.findByPropertyIdOrderByLoggedAtDesc(propertyId);
+    public List<RatingLog> getLogs(Property property) {
+        return repository.findByProperty(property);
     }
 }

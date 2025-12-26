@@ -1,12 +1,13 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.RatingLogEntity;
+import com.example.demo.entity.Property;
+import com.example.demo.entity.RatingLog;
 
 import java.util.List;
 
 public interface RatingLogService {
 
-    RatingLogEntity saveLog(RatingLogEntity log);
+    RatingLog addLog(Property property, String message);
 
-    List<RatingLogEntity> getLogsByPropertyId(Long propertyId);
+    List<RatingLog> getLogs(Property property);
 }
