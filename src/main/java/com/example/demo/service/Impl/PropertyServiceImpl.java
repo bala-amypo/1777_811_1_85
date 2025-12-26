@@ -1,6 +1,6 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.Property;
 import com.example.demo.repository.PropertyRepository;
 import com.example.demo.service.PropertyService;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,17 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public PropertyEntity createProperty(PropertyEntity property) {
+    public Property addProperty(Property property) {
         return propertyRepository.save(property);
     }
 
     @Override
-    public PropertyEntity getPropertyById(Long id) {
-        return propertyRepository.findById(id).orElse(null);
+    public List<Property> getAllProperties() {
+        return propertyRepository.findAll();
     }
 
     @Override
-    public List<PropertyEntity> getAllProperties() {
-        return propertyRepository.findAll();
+    public Property getPropertyById(Long id) {
+        return propertyRepository.findById(id).orElseThrow();
     }
 }

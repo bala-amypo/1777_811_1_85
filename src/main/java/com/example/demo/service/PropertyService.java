@@ -1,14 +1,14 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.Property;
 
 import java.util.List;
 
 public interface PropertyService {
 
-    PropertyEntity createProperty(PropertyEntity property);
+    Property addProperty(Property property);
 
-    PropertyEntity getPropertyById(Long id);
+    List<Property> getAllProperties();
 
-    List<PropertyEntity> getAllProperties();
+    Property getPropertyById(Long id);
 }
