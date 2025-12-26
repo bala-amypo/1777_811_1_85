@@ -1,9 +1,12 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.Property;
 import com.example.demo.repository.PropertyRepository;
+import com.example.demo.service.PropertyService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,27 +15,29 @@ import java.util.List;
 @RequestMapping("/properties")
 public class PropertyController {
 
+    private final PropertyService propertyService;
     private final PropertyRepository propertyRepository;
 
-    public PropertyController(PropertyRepository propertyRepository) {
+    public PropertyController(PropertyService propertyService,
+                              PropertyRepository propertyRepository) {
+        this.propertyService = propertyService;
         this.propertyRepository = propertyRepository;
     }
 
     @PostMapping
-    public ResponseEntity<PropertyEntity> createProperty(@RequestBody PropertyEntity property) {
-        PropertyEntity savedProperty = propertyRepository.save(property);
-        return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Property> addProperty(@Valid @RequestBody Property property) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(propertyService.addProperty(property));
     }
 
     @GetMapping
-    public ResponseEntity<List<PropertyEntity>> getAllProperties() {
-        return ResponseEntity.ok(propertyRepository.findAll());
+    public ResponseEntity<List<Property>> listProperties() {
+        return ResponseEntity.ok(propertyService.getAllProperties());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PropertyEntity> getPropertyById(@PathVariable Long id) {
-        return propertyRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Property> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(propertyRepository.findById(id).orElseThrow());
     }
 }

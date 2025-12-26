@@ -1,62 +1,47 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.FacilityScoreEntity;
-import com.example.demo.entity.PropertyEntity;
-import com.example.demo.entity.RatingEntity;
-import com.example.demo.repository.FacilityScoreRepository;
+import com.example.demo.entity.Property;
+import com.example.demo.entity.RatingResult;
 import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingRepository;
-import com.example.demo.util.RatingCalculatorUtil;
+import com.example.demo.repository.RatingResultRepository;
+import com.example.demo.service.RatingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/ratings")
 public class RatingController {
 
+    private final RatingService ratingService;
     private final PropertyRepository propertyRepository;
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final RatingRepository ratingRepository;
+    private final RatingResultRepository ratingResultRepository;
 
-    public RatingController(PropertyRepository propertyRepository,
-                            FacilityScoreRepository facilityScoreRepository,
-                            RatingRepository ratingRepository) {
+    public RatingController(RatingService ratingService,
+                            PropertyRepository propertyRepository,
+                            RatingResultRepository ratingResultRepository) {
+        this.ratingService = ratingService;
         this.propertyRepository = propertyRepository;
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.ratingRepository = ratingRepository;
+        this.ratingResultRepository = ratingResultRepository;
     }
 
     @PostMapping("/generate/{propertyId}")
-    public ResponseEntity<RatingEntity> generateRating(@PathVariable Long propertyId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<RatingResult> generate(@PathVariable Long propertyId) {
 
-        PropertyEntity property = propertyRepository.findById(propertyId).orElse(null);
-        if (property == null) {
-            return ResponseEntity.notFound().build();
-        }
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        RatingResult rr = ratingService.generateRating(property);
 
-        FacilityScoreEntity score = facilityScoreRepository
-                .findTopByPropertyIdOrderBySubmittedAtDesc(propertyId)
-                .orElse(null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(rr);
+    }
 
-        if (score == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    @GetMapping("/property/{propertyId}")
+    public ResponseEntity<RatingResult> getByProperty(@PathVariable Long propertyId) {
 
-        double finalScore = RatingCalculatorUtil.calculate(
-                score.getSchoolProximity(),
-                score.getHospitalProximity(),
-                score.getTransportAccess(),
-                score.getSafetyScore()
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        return ResponseEntity.ok(
+                ratingResultRepository.findByProperty(property).orElseThrow()
         );
-
-        RatingEntity rating = new RatingEntity();
-        rating.setProperty(property);
-        rating.setFinalRating(finalScore);
-        rating.setRatingCategory(RatingCalculatorUtil.category(finalScore));
-
-        RatingEntity savedRating = ratingRepository.save(rating);
-
-        return new ResponseEntity<>(savedRating, HttpStatus.CREATED);
     }
 }

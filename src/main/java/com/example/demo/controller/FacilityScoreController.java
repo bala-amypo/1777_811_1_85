@@ -1,47 +1,49 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.FacilityScoreEntity;
-import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
 import com.example.demo.repository.FacilityScoreRepository;
 import com.example.demo.repository.PropertyRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/scores")
 public class FacilityScoreController {
 
-    private final FacilityScoreRepository facilityScoreRepository;
+    private final FacilityScoreRepository scoreRepository;
     private final PropertyRepository propertyRepository;
 
-    public FacilityScoreController(FacilityScoreRepository facilityScoreRepository,
+    public FacilityScoreController(FacilityScoreRepository scoreRepository,
                                    PropertyRepository propertyRepository) {
-        this.facilityScoreRepository = facilityScoreRepository;
+        this.scoreRepository = scoreRepository;
         this.propertyRepository = propertyRepository;
     }
 
     @PostMapping("/{propertyId}")
-    public ResponseEntity<FacilityScoreEntity> submitScore(
-            @PathVariable Long propertyId,
-            @RequestBody FacilityScoreEntity score) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createScore(@PathVariable Long propertyId,
+                                         @Valid @RequestBody FacilityScore score) {
 
-        PropertyEntity property = propertyRepository.findById(propertyId).orElse(null);
-        if (property == null) {
-            return ResponseEntity.notFound().build();
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+
+        if (scoreRepository.findByProperty(property).isPresent()) {
+            return ResponseEntity.badRequest().build();
         }
 
         score.setProperty(property);
-        FacilityScoreEntity savedScore = facilityScoreRepository.save(score);
-
-        return new ResponseEntity<>(savedScore, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(scoreRepository.save(score));
     }
 
     @GetMapping("/{propertyId}")
-    public ResponseEntity<FacilityScoreEntity> getLatestScore(@PathVariable Long propertyId) {
-        return facilityScoreRepository
-                .findTopByPropertyIdOrderBySubmittedAtDesc(propertyId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<FacilityScore> getScore(@PathVariable Long propertyId) {
+        Property property = propertyRepository.findById(propertyId).orElseThrow();
+        return ResponseEntity.ok(
+                scoreRepository.findByProperty(property).orElseThrow()
+        );
     }
 }
