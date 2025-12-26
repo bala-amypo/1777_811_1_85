@@ -12,6 +12,8 @@ public class Property {
     private Long id;
 
     private String title;
+    @Column(nullable = false)
+    private String city;
 
     @ManyToMany(mappedBy = "assignedProperties")
     private Set<User> assignedUsers = new HashSet<>();
@@ -25,6 +27,13 @@ public class Property {
     public Set<User> getAssignedUsers() {
         return assignedUsers;
     }
+    public String getCity() {
+    return city;
+}
+
+public void setCity(String city) {
+    this.city = city;
+}
 
     public void setAssignedUsers(Set<User> assignedUsers) {
         this.assignedUsers = assignedUsers;
