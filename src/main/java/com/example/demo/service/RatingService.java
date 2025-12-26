@@ -1,8 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.RatingEntity;
+import com.example.demo.entity.Property;
+import com.example.demo.entity.RatingResult;
 
 public interface RatingService {
 
-    RatingEntity generateRating(Long propertyId);
+    RatingResult generateRating(Property property);
 }

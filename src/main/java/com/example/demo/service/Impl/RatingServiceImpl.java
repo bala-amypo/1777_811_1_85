@@ -1,58 +1,42 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.FacilityScoreEntity;
-import com.example.demo.entity.PropertyEntity;
-import com.example.demo.entity.RatingEntity;
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
+import com.example.demo.entity.RatingResult;
 import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.PropertyRepository;
-import com.example.demo.repository.RatingRepository;
+import com.example.demo.repository.RatingResultRepository;
 import com.example.demo.service.RatingService;
-import com.example.demo.util.RatingCalculatorUtil;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
-    private final PropertyRepository propertyRepository;
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final RatingRepository ratingRepository;
+    private final FacilityScoreRepository scoreRepository;
+    private final RatingResultRepository ratingResultRepository;
 
-    public RatingServiceImpl(PropertyRepository propertyRepository,
-                             FacilityScoreRepository facilityScoreRepository,
-                             RatingRepository ratingRepository) {
-        this.propertyRepository = propertyRepository;
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.ratingRepository = ratingRepository;
+    public RatingServiceImpl(FacilityScoreRepository scoreRepository,
+                             RatingResultRepository ratingResultRepository) {
+        this.scoreRepository = scoreRepository;
+        this.ratingResultRepository = ratingResultRepository;
     }
 
     @Override
-    public RatingEntity generateRating(Long propertyId) {
+    public RatingResult generateRating(Property property) {
 
-        PropertyEntity property = propertyRepository.findById(propertyId).orElse(null);
-        if (property == null) {
-            return null;
-        }
+        FacilityScore s = scoreRepository.findByProperty(property).orElseThrow();
 
-        FacilityScoreEntity score = facilityScoreRepository
-                .findTopByPropertyIdOrderBySubmittedAtDesc(propertyId)
-                .orElse(null);
+        double avg = (s.getSchoolProximity()
+                + s.getHospitalProximity()
+                + s.getTransportAccess()
+                + s.getSafetyScore()) / 4.0;
 
-        if (score == null) {
-            return null;
-        }
+        RatingResult rr = new RatingResult();
+        rr.setProperty(property);
+        rr.setFinalRating(avg);
+        rr.setRatingCategory(avg >= 8 ? "EXCELLENT" :
+                             avg >= 6 ? "GOOD" :
+                             avg >= 4 ? "AVERAGE" : "POOR");
 
-        double finalScore = RatingCalculatorUtil.calculate(
-                score.getSchoolProximity(),
-                score.getHospitalProximity(),
-                score.getTransportAccess(),
-                score.getSafetyScore()
-        );
-
-        RatingEntity rating = new RatingEntity();
-        rating.setProperty(property);
-        rating.setFinalRating(finalScore);
-        rating.setRatingCategory(RatingCalculatorUtil.category(finalScore));
-
-        return ratingRepository.save(rating);
+        return ratingResultRepository.save(rr);
     }
 }

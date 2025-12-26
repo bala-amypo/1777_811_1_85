@@ -1,40 +1,28 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.FacilityScoreEntity;
-import com.example.demo.entity.PropertyEntity;
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
 import com.example.demo.repository.FacilityScoreRepository;
-import com.example.demo.repository.PropertyRepository;
 import com.example.demo.service.FacilityScoreService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FacilityScoreServiceImpl implements FacilityScoreService {
 
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final PropertyRepository propertyRepository;
+    private final FacilityScoreRepository repository;
 
-    public FacilityScoreServiceImpl(FacilityScoreRepository facilityScoreRepository,
-                                    PropertyRepository propertyRepository) {
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.propertyRepository = propertyRepository;
+    public FacilityScoreServiceImpl(FacilityScoreRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    public FacilityScoreEntity submitScore(Long propertyId, FacilityScoreEntity score) {
-
-        PropertyEntity property = propertyRepository.findById(propertyId).orElse(null);
-        if (property == null) {
-            return null;
-        }
-
+    public FacilityScore createScore(Property property, FacilityScore score) {
         score.setProperty(property);
-        return facilityScoreRepository.save(score);
+        return repository.save(score);
     }
 
     @Override
-    public FacilityScoreEntity getLatestScore(Long propertyId) {
-        return facilityScoreRepository
-                .findTopByPropertyIdOrderBySubmittedAtDesc(propertyId)
-                .orElse(null);
+    public FacilityScore getByProperty(Property property) {
+        return repository.findByProperty(property).orElseThrow();
     }
 }
