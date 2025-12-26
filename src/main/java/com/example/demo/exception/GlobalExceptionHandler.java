@@ -1,27 +1,29 @@
 package com.example.demo.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(ResourceNotFoundException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public void handleUnsupportedMediaType() {
+        throw new RuntimeException("Unsupported media type");
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(BadRequestException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public void handleBadMethod() {
+        throw new RuntimeException("Method not supported");
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public org.springframework.http.ResponseEntity<String> handleRuntime(RuntimeException ex) {
+        return new org.springframework.http.ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }
