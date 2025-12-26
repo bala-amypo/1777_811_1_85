@@ -1,7 +1,7 @@
 package com.example.demo.config;
 
 import com.example.demo.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,13 +11,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    // ✅ Manual constructor (NO Lombok)
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -28,14 +30,14 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .exceptionHandling(ex -> ex
-                // ✅ NO TOKEN → 401
+                // ✅ No token → 401
                 .authenticationEntryPoint(
-                    (req, res, ex1) ->
+                    (req, res, e) ->
                         res.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                 )
-                // ✅ TOKEN OK BUT ROLE FAIL → 403
+                // ✅ Token valid but role denied → 403
                 .accessDeniedHandler(
-                    (req, res, ex2) ->
+                    (req, res, e) ->
                         res.sendError(HttpServletResponse.SC_FORBIDDEN)
                 )
             )
