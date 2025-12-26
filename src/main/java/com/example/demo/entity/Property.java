@@ -13,6 +13,9 @@ public class Property {
     private Long id;
 
     @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
     private String address;
 
     @Column(nullable = false)
@@ -24,13 +27,27 @@ public class Property {
     @Column(name = "area_sq_ft", nullable = false)
     private double areaSqFt;
 
+    /* ===================== RELATIONSHIPS ===================== */
+
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RatingLog> ratingLogs = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "property_users",
+        joinColumns = @JoinColumn(name = "property_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> assignedUsers = new ArrayList<>();
 
     /* ===================== GETTERS ===================== */
 
     public Long getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getAddress() {
@@ -53,10 +70,18 @@ public class Property {
         return ratingLogs;
     }
 
+    public List<User> getAssignedUsers() {
+        return assignedUsers;
+    }
+
     /* ===================== SETTERS ===================== */
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setAddress(String address) {
@@ -75,10 +100,14 @@ public class Property {
         this.areaSqFt = areaSqFt;
     }
 
-    /* ===================== HELPER METHOD ===================== */
+    /* ===================== HELPER METHODS ===================== */
 
     public void addRatingLog(RatingLog ratingLog) {
         ratingLogs.add(ratingLog);
         ratingLog.setProperty(this);
+    }
+
+    public void assignUser(User user) {
+        assignedUsers.add(user);
     }
 }
