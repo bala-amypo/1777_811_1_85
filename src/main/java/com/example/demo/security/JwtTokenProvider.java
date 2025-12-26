@@ -1,8 +1,6 @@
 package com.example.demo.security;
 
-import com.example.demo.entity.User;
 import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -11,16 +9,14 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:secret-key}")
-    private String jwtSecret;
+    private final String jwtSecret = "mySecretKey12345";
+    private final long jwtExpirationMs = 86400000; // 1 day
 
-    @Value("${jwt.expiration:86400000}")
-    private long jwtExpirationMs;
-
-    public String generateToken(Authentication authentication, User user) {
+    // ================= CREATE TOKEN =================
+    public String generateToken(Authentication authentication, com.example.demo.entity.User user) {
 
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getEmail())   // EMAIL is subject
                 .claim("userId", user.getId())
                 .claim("role", user.getRole())
                 .setIssuedAt(new Date())
@@ -29,17 +25,31 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // ================= EXTRACT USERNAME / EMAIL =================
+    public String getUsernameFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // ⭐ REQUIRED BY JwtAuthenticationFilter
+    public String getEmailFromToken(String token) {
+        return getUsernameFromToken(token);
+    }
+
+    // ================= USER ID =================
     public Long getUserIdFromToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
+
         return claims.get("userId", Long.class);
     }
-    public String getEmailFromToken(String token) {
-        return getUsernameFromToken(token);
-}
 
+    // ================= VALIDATION =================
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
