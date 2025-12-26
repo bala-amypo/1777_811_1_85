@@ -9,4 +9,7 @@ import java.util.Optional;
 public interface FacilityScoreRepository extends JpaRepository<FacilityScore, Long> {
 
     Optional<FacilityScore> findByProperty(Property property);
+
+    // ✅ THIS IS THE MISSING METHOD
+    Optional<FacilityScore> findByPropertyId(Long propertyId);
 }

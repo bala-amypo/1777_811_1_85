@@ -5,6 +5,8 @@ import com.example.demo.repository.FacilityScoreRepository;
 import com.example.demo.service.FacilityScoreService;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class FacilityScoreServiceImpl implements FacilityScoreService {
 
@@ -15,13 +17,12 @@ public class FacilityScoreServiceImpl implements FacilityScoreService {
     }
 
     @Override
-    public FacilityScore save(FacilityScore score) {
-        return repository.save(score);
+    public Optional<FacilityScore> getByPropertyId(Long propertyId) {
+        return repository.findByPropertyId(propertyId);
     }
 
     @Override
-    public FacilityScore getByPropertyId(Long propertyId) {
-        return repository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new RuntimeException("Score not found"));
+    public FacilityScore save(FacilityScore score) {
+        return repository.save(score);
     }
 }
