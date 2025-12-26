@@ -1,8 +1,10 @@
 package com.example.demo.config;
 
 import com.example.demo.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,7 +25,6 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    // 🔥 REQUIRED BY TEST: bean name MUST be "securityFilterChain"
     @Bean(name = "securityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -32,48 +33,56 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+
+            // 🔥 THIS FIXES 401 vs 403 (CRITICAL)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN))
+            )
+
             .authorizeHttpRequests(auth -> auth
+
+                // PUBLIC
                 .requestMatchers(
                         "/auth/**",
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // ADMIN only
+                // MUST BE AUTHENTICATED FIRST
                 .requestMatchers(
-                        "/properties",
+                        "/properties/**",
                         "/scores/**",
-                        "/ratings/generate/**"
-                ).hasRole("ADMIN")
+                        "/ratings/**"
+                ).authenticated()
 
-                // ADMIN + ANALYST
-                .requestMatchers("/properties/**")
-                .hasAnyRole("ADMIN", "ANALYST")
+                // ROLE RULES
+                .requestMatchers(HttpMethod.POST, "/properties")
+                    .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/scores/**")
+                    .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/ratings/generate/**")
+                    .hasRole("ADMIN")
 
                 .anyRequest().authenticated()
             )
+
             .addFilterBefore(
                     jwtAuthenticationFilter,
                     UsernamePasswordAuthenticationFilter.class
             );
-            http
-    .exceptionHandling(ex -> ex
-        .authenticationEntryPoint((request, response, authException) -> {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-        })
-        .accessDeniedHandler((request, response, accessDeniedException) -> {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-        })
-    );
-
 
         return http.build();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
