@@ -1,41 +1,84 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "property")
 public class Property {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
+    @Column(nullable = false)
+    private String address;
+
     @Column(nullable = false)
     private String city;
 
-    @ManyToMany(mappedBy = "assignedProperties")
-    private Set<User> assignedUsers = new HashSet<>();
+    @Column(nullable = false)
+    private double price;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Column(name = "area_sq_ft", nullable = false)
+    private double areaSqFt;
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RatingLog> ratingLogs = new ArrayList<>();
 
-    public Set<User> getAssignedUsers() {
-        return assignedUsers;
+    /* ===================== GETTERS ===================== */
+
+    public Long getId() {
+        return id;
     }
+
+    public String getAddress() {
+        return address;
+    }
+
     public String getCity() {
-    return city;
-}
+        return city;
+    }
 
-public void setCity(String city) {
-    this.city = city;
-}
+    public double getPrice() {
+        return price;
+    }
 
-    public void setAssignedUsers(Set<User> assignedUsers) {
-        this.assignedUsers = assignedUsers;
+    public double getAreaSqFt() {
+        return areaSqFt;
+    }
+
+    public List<RatingLog> getRatingLogs() {
+        return ratingLogs;
+    }
+
+    /* ===================== SETTERS ===================== */
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setAreaSqFt(double areaSqFt) {
+        this.areaSqFt = areaSqFt;
+    }
+
+    /* ===================== HELPER METHOD ===================== */
+
+    public void addRatingLog(RatingLog ratingLog) {
+        ratingLogs.add(ratingLog);
+        ratingLog.setProperty(this);
     }
 }
