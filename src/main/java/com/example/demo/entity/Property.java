@@ -1,32 +1,36 @@
 package com.example.demo.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Property {
 
     private Long id;
-    private String city;
-    private double baseScore;
+    private String title;
+    private String address;
+    private double price;
+    private double areaSqFt;
 
-    public Long getId() {
-        return id;
-    }
+    private List<RatingLog> ratingLogs = new ArrayList<>();
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Property() {}
 
-    public String getCity() {
-        return city;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public double getBaseScore() {
-        return baseScore;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setBaseScore(double baseScore) {
-        this.baseScore = baseScore;
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public double getAreaSqFt() { return areaSqFt; }
+    public void setAreaSqFt(double areaSqFt) { this.areaSqFt = areaSqFt; }
+
+    public void addRatingLog(RatingLog log) {
+        this.ratingLogs.add(log);
     }
 }
