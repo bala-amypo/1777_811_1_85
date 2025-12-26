@@ -1,20 +1,39 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import java.util.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
+@Table(name = "properties")
 public class Property {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String title;
+
+    @NotBlank
     private String address;
+
+    @NotBlank
     private String city;
-    private double price;
-    private double areaSqFt;
+
+    @NotNull
+    @Positive
+    private Double price;
+
+    @NotNull
+    @Positive
+    private Double areaSqFt;
 
     @OneToOne(mappedBy = "property", cascade = CascadeType.ALL)
     private FacilityScore facilityScore;
@@ -28,29 +47,67 @@ public class Property {
     @ManyToMany(mappedBy = "assignedProperties")
     private Set<User> assignedUsers = new HashSet<>();
 
+    // ===== Helper =====
     public void addRatingLog(RatingLog log) {
-        log.setProperty(this);
         ratingLogs.add(log);
+        log.setProperty(this);
     }
 
-    // getters & setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // ===== Getters & Setters =====
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public double getAreaSqFt() { return areaSqFt; }
-    public void setAreaSqFt(double areaSqFt) { this.areaSqFt = areaSqFt; }
+    public String getAddress() {
+        return address;
+    }
+ 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+ 
+    public String getCity() {
+        return city;
+    }
+ 
+    public void setCity(String city) {
+        this.city = city;
+    }
+ 
+    public Double getPrice() {
+        return price;
+    }
+ 
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+ 
+    public Double getAreaSqFt() {
+        return areaSqFt;
+    }
+ 
+    public void setAreaSqFt(Double areaSqFt) {
+        this.areaSqFt = areaSqFt;
+    }
 
-    public Set<User> getAssignedUsers() { return assignedUsers; }
+    public List<RatingLog> getRatingLogs() {
+        return ratingLogs;
+    }
+
+    public Set<User> getAssignedUsers() {
+        return assignedUsers;
+    }
 }

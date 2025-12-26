@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Min;
 
 @Entity
 @Table(
-    uniqueConstraints = @UniqueConstraint(columnNames = "property_id")
+        name = "facility_scores",
+        uniqueConstraints = @UniqueConstraint(columnNames = "property_id")
 )
 public class FacilityScore {
 
@@ -15,7 +16,7 @@ public class FacilityScore {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "property_id")
+    @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
     @Min(0) @Max(10)
@@ -30,22 +31,53 @@ public class FacilityScore {
     @Min(0) @Max(10)
     private int safetyScore;
 
-    // getters & setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // ===== Getters & Setters =====
 
-    public Property getProperty() { return property; }
-    public void setProperty(Property property) { this.property = property; }
+    public Long getId() {
+        return id;
+    }
 
-    public int getSchoolProximity() { return schoolProximity; }
-    public void setSchoolProximity(int schoolProximity) { this.schoolProximity = schoolProximity; }
+    public Property getProperty() {
+        return property;
+    }
 
-    public int getHospitalProximity() { return hospitalProximity; }
-    public void setHospitalProximity(int hospitalProximity) { this.hospitalProximity = hospitalProximity; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public int getTransportAccess() { return transportAccess; }
-    public void setTransportAccess(int transportAccess) { this.transportAccess = transportAccess; }
+    public void setProperty(Property property) {
+        this.property = property;
+    }
 
-    public int getSafetyScore() { return safetyScore; }
-    public void setSafetyScore(int safetyScore) { this.safetyScore = safetyScore; }
+    public int getSchoolProximity() {
+        return schoolProximity;
+    }
+
+    public void setSchoolProximity(int schoolProximity) {
+        this.schoolProximity = schoolProximity;
+    }
+
+    public int getHospitalProximity() {
+        return hospitalProximity;
+    }
+
+    public void setHospitalProximity(int hospitalProximity) {
+        this.hospitalProximity = hospitalProximity;
+    }
+
+    public int getTransportAccess() {
+        return transportAccess;
+    }
+
+    public void setTransportAccess(int transportAccess) {
+        this.transportAccess = transportAccess;
+    }
+
+    public int getSafetyScore() {
+        return safetyScore;
+    }
+
+    public void setSafetyScore(int safetyScore) {
+        this.safetyScore = safetyScore;
+    }
 }
