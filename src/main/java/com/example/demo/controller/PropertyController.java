@@ -1,21 +1,3 @@
-package com.example.demo.security;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-
-@Configuration
-@EnableMethodSecurity(prePostEnabled = true) // ✅ THIS IS THE KEY
-public class SecurityConfig {
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 package com.example.demo.controller;
 
 import com.example.demo.entity.Property;
@@ -36,8 +18,7 @@ public class PropertyController {
     @Autowired
     private PropertyService propertyService;
 
-    // ❌ ANALYST FORBIDDEN
-    // ✅ ADMIN ONLY
+    // ADMIN ONLY
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Property> addProperty(@Valid @RequestBody Property property) {
@@ -45,36 +26,10 @@ public class PropertyController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
-    // ✅ ADMIN + ANALYST CAN VIEW
+    // ADMIN + ANALYST
     @PreAuthorize("hasAnyRole('ADMIN','ANALYST')")
     @GetMapping
     public ResponseEntity<List<Property>> getAllProperties() {
         return ResponseEntity.ok(propertyService.getAllProperties());
-    }
-}
-
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/auth/**",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            );
-
-        return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 }
