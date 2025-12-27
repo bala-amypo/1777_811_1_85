@@ -14,12 +14,12 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    // HS512 requires >= 512-bit key
     private static final SecretKey SECRET_KEY =
-            Keys.hmacShaKeyFor(
-                    "my-secret-key-my-secret-key-my-secret-key-my-secret-key"
-                            .getBytes()
-            );
+        Keys.hmacShaKeyFor(
+                "my-secret-key-my-secret-key-my-secret-key-my-secret-key-my-secret-key"
+                        .getBytes()
+        );
+
 
     private static final long EXPIRATION_TIME =
             1000 * 60 * 60 * 24; // 24 hours
