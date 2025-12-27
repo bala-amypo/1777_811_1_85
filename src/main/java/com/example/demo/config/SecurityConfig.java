@@ -1,27 +1,35 @@
 package com.example.demo.config;
 
+import com.example.demo.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
-    @Bean(name = "securityFilterChain")
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            // 🔴 Disable CSRF (tests expect this)
             .csrf(csrf -> csrf.disable())
 
-            // ✅ FIX: Return 401 instead of 403
+            // ✅ CORRECT STATUS HANDLING
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(
                     (request, response, authException) ->
@@ -34,37 +42,29 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(auth -> auth
-                // OPTIONS must be allowed
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // Public endpoints
                 .requestMatchers("/auth/**").permitAll()
-
-                // Swagger
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html"
                 ).permitAll()
-
-                // Everything else needs auth
                 .anyRequest().authenticated()
             )
 
-            // Disable default login
+            // 🔥 THIS IS THE MISSING LINE 🔥
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
             .httpBasic(httpBasic -> httpBasic.disable())
             .formLogin(form -> form.disable());
 
         return http.build();
     }
 
-    // REQUIRED BY TESTS
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // REQUIRED BY TESTS
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration) throws Exception {
