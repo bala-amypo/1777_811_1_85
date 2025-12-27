@@ -129,4 +129,10 @@ public class Property {
     public void setAssignedUsers(Set<User> assignedUsers) {
         this.assignedUsers = assignedUsers;
     }
+
+    public void addRatingLog(RatingLog log) {
+    ratingLogs.add(log);
+    log.setProperty(this);
+}
+
 }
