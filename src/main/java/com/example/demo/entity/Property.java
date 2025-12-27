@@ -1,4 +1,7 @@
 package com.example.demo.entity;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 
 import jakarta.persistence.*;
 import java.util.*;
