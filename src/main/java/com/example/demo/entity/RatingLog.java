@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -14,42 +15,47 @@ public class RatingLog {
 
     private String message;
 
-    @ManyToOne
-@JoinColumn(name = "property_id")
-@JsonBackReference
-private Property property;
-
+    @Column(name = "logged_at")
     private LocalDateTime loggedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "property_id")
+    @JsonBackReference
+    private Property property;
 
     @PrePersist
     public void onCreate() {
         this.loggedAt = LocalDateTime.now();
     }
 
-    // ===== Getters & Setters =====
+    // ===== getters & setters =====
 
     public Long getId() {
         return id;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Property getProperty() {
-        return property;
-    }
-
-    public LocalDateTime getLoggedAt() {
-        return loggedAt;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public LocalDateTime getLoggedAt() {
+        return loggedAt;
+    }
+
+    public void setLoggedAt(LocalDateTime loggedAt) {
+        this.loggedAt = loggedAt;
+    }
+
+    public Property getProperty() {
+        return property;
     }
 
     public void setProperty(Property property) {

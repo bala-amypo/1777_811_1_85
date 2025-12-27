@@ -2,11 +2,12 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,12 +29,14 @@ public class Property {
     private String city;
 
     @NotNull
-    @Min(0)
-    private Double price;        // ✅ Double (not float)
+    @PositiveOrZero
+    @Column(name = "price")
+    private float price;
 
     @NotNull
-    @Min(0)
-    private Double areaSqFt;     // ✅ Double (not float)
+    @PositiveOrZero
+    @Column(name = "area_sq_ft")
+    private float areaSqFt;
 
     @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private FacilityScore facilityScore;
@@ -45,15 +48,15 @@ public class Property {
     @JsonManagedReference
     private List<RatingLog> ratingLogs = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "assignedProperties")
-    private Set<User> assignedUsers;
+    @ManyToMany
+    @JoinTable(
+            name = "user_property",
+            joinColumns = @JoinColumn(name = "property_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> assignedUsers = new HashSet<>();
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-@JsonManagedReference
-private List<RatingLog> ratingLogs = new ArrayList<>();
-
-
-    // ---------- getters & setters ----------
+    // ===== getters & setters =====
 
     public Long getId() {
         return id;
@@ -87,19 +90,19 @@ private List<RatingLog> ratingLogs = new ArrayList<>();
         this.city = city;
     }
 
-    public Double getPrice() {          // ✅ Double
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) { // ✅ Double
+    public void setPrice(float price) {
         this.price = price;
     }
 
-    public Double getAreaSqFt() {          // ✅ Double
+    public float getAreaSqFt() {
         return areaSqFt;
     }
 
-    public void setAreaSqFt(Double areaSqFt) { // ✅ Double
+    public void setAreaSqFt(float areaSqFt) {
         this.areaSqFt = areaSqFt;
     }
 
@@ -134,10 +137,4 @@ private List<RatingLog> ratingLogs = new ArrayList<>();
     public void setAssignedUsers(Set<User> assignedUsers) {
         this.assignedUsers = assignedUsers;
     }
-
-    public void addRatingLog(RatingLog log) {
-    ratingLogs.add(log);
-    log.setProperty(this);
-}
-
 }
