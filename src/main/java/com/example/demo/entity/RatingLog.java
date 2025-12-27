@@ -28,14 +28,10 @@ public class RatingLog {
         this.loggedAt = LocalDateTime.now();
     }
 
-    // ===== getters & setters =====
+    // getters & setters
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getMessage() {
@@ -48,10 +44,6 @@ public class RatingLog {
 
     public LocalDateTime getLoggedAt() {
         return loggedAt;
-    }
-
-    public void setLoggedAt(LocalDateTime loggedAt) {
-        this.loggedAt = loggedAt;
     }
 
     public Property getProperty() {

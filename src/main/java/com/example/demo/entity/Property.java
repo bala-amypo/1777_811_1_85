@@ -30,13 +30,12 @@ public class Property {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "price")
-    private float price;
+    private Double price;
 
     @NotNull
     @PositiveOrZero
     @Column(name = "area_sq_ft")
-    private float areaSqFt;
+    private Double areaSqFt;
 
     @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private FacilityScore facilityScore;
@@ -55,6 +54,12 @@ public class Property {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> assignedUsers = new HashSet<>();
+
+    // 🔥 REQUIRED BY TESTS
+    public void addRatingLog(RatingLog log) {
+        ratingLogs.add(log);
+        log.setProperty(this);
+    }
 
     // ===== getters & setters =====
 
@@ -90,19 +95,19 @@ public class Property {
         this.city = city;
     }
 
-    public float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public float getAreaSqFt() {
+    public Double getAreaSqFt() {
         return areaSqFt;
     }
 
-    public void setAreaSqFt(float areaSqFt) {
+    public void setAreaSqFt(Double areaSqFt) {
         this.areaSqFt = areaSqFt;
     }
 
@@ -126,15 +131,7 @@ public class Property {
         return ratingLogs;
     }
 
-    public void setRatingLogs(List<RatingLog> ratingLogs) {
-        this.ratingLogs = ratingLogs;
-    }
-
     public Set<User> getAssignedUsers() {
         return assignedUsers;
-    }
-
-    public void setAssignedUsers(Set<User> assignedUsers) {
-        this.assignedUsers = assignedUsers;
     }
 }
