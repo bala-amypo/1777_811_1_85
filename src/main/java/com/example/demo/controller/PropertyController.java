@@ -18,7 +18,7 @@ public class PropertyController {
     @Autowired
     private PropertyService propertyService;
 
-    // ADMIN ONLY
+    // 🔥 ONLY ADMIN CAN ADD PROPERTY
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Property> addProperty(@Valid @RequestBody Property property) {
@@ -26,7 +26,7 @@ public class PropertyController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
-    // ADMIN + ANALYST
+    // 🔥 ADMIN + ANALYST CAN VIEW
     @PreAuthorize("hasAnyRole('ADMIN','ANALYST')")
     @GetMapping
     public ResponseEntity<List<Property>> getAllProperties() {
