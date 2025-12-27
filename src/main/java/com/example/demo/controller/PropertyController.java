@@ -32,4 +32,3 @@ public class PropertyController {
     public ResponseEntity<List<Property>> getAllProperties() {
         return ResponseEntity.ok(propertyService.getAllProperties());
     }
-}
