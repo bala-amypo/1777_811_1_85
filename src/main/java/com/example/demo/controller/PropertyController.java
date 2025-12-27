@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.entity.Property;
 import com.example.demo.service.PropertyService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,21 +14,24 @@ import java.util.List;
 @RequestMapping("/properties")
 public class PropertyController {
 
-    @Autowired
-    private PropertyService propertyService;
+    private final PropertyService propertyService;
 
-    // 🔥 ONLY ADMIN CAN ADD PROPERTY
+    public PropertyController(PropertyService propertyService) {
+        this.propertyService = propertyService;
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Property> addProperty(@Valid @RequestBody Property property) {
-        Property saved = propertyService.addProperty(property);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                propertyService.addProperty(property),
+                HttpStatus.CREATED
+        );
     }
 
-    // 🔥 ADMIN + ANALYST CAN VIEW
     @PreAuthorize("hasAnyRole('ADMIN','ANALYST')")
     @GetMapping
     public ResponseEntity<List<Property>> getAllProperties() {
         return ResponseEntity.ok(propertyService.getAllProperties());
     }
-    }
+}
