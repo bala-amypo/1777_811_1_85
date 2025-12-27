@@ -1,9 +1,11 @@
 package com.example.demo.security;
 
+import com.example.demo.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -12,7 +14,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    // MUST be >= 512 bits for HS512
+    // HS512 requires >= 512-bit key
     private static final SecretKey SECRET_KEY =
             Keys.hmacShaKeyFor(
                     "my-secret-key-my-secret-key-my-secret-key-my-secret-key"
@@ -22,13 +24,14 @@ public class JwtTokenProvider {
     private static final long EXPIRATION_TIME =
             1000 * 60 * 60 * 24; // 24 hours
 
-    // ================= TOKEN CREATION =================
-
-    public String generateToken(String email, Long userId, String role) {
+    // =================================================
+    // ✅ METHOD USED BY AuthController (DO NOT REMOVE)
+    // =================================================
+    public String generateToken(Authentication authentication, User user) {
         return Jwts.builder()
-                .setSubject(email)
-                .claim("userId", userId)
-                .claim("role", role)
+                .setSubject(user.getEmail())
+                .claim("userId", user.getId())
+                .claim("role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(
                         new Date(System.currentTimeMillis() + EXPIRATION_TIME)
@@ -37,8 +40,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // ================= TOKEN VALIDATION =================
-
+    // =================================================
+    // ✅ METHODS USED BY JwtAuthenticationFilter
+    // =================================================
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -46,12 +50,10 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return false;
         }
     }
-
-    // ================= CLAIM EXTRACTION =================
 
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
