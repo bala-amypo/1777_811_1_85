@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableMethodSecurity(prePostEnabled = true) // 🔥 THIS IS THE FIX
+@EnableMethodSecurity(prePostEnabled = true) // 🔥 THIS MAKES @PreAuthorize WORK
 public class SecurityConfig {
 
     @Bean
