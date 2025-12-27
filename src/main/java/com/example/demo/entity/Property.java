@@ -48,6 +48,11 @@ public class Property {
     @ManyToMany(mappedBy = "assignedProperties")
     private Set<User> assignedUsers;
 
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+@JsonManagedReference
+private List<RatingLog> ratingLogs = new ArrayList<>();
+
+
     // ---------- getters & setters ----------
 
     public Long getId() {

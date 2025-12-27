@@ -15,8 +15,9 @@ public class RatingLog {
     private String message;
 
     @ManyToOne
-    @JoinColumn(name = "property_id")
-    private Property property;
+@JoinColumn(name = "property_id")
+@JsonBackReference
+private Property property;
 
     private LocalDateTime loggedAt;
 
