@@ -2,6 +2,7 @@ package com.example.demo.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +15,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -22,8 +25,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
-    // 🔑 MUST MATCH TEST TOKENS
-    private static final String SECRET_KEY = "real-estate-rating-engine-secret-key";
+    // MUST match test tokens
+    private static final String SECRET =
+            "real-estate-rating-engine-secret-key-real-estate-rating-engine-secret-key";
+
+    private static final SecretKey KEY =
+            Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
     public JwtAuthenticationFilter(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -36,47 +43,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = authHeader.substring(7);
-        String username;
-
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(SECRET_KEY.getBytes())
-                    .parseClaimsJws(jwt)
+            String token = header.substring(7);
+
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token)
                     .getBody();
 
-            username = claims.getSubject();
+            String email = claims.getSubject();
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null &&
+                claims.getExpiration().after(new Date())) {
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(email);
 
-                if (!claims.getExpiration().before(new Date())) {
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                auth.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
 
-        } catch (Exception e) {
-            // Invalid token → ignore and continue (tests expect this)
+        } catch (Exception ignored) {
+            // tests EXPECT silent failure
         }
 
         filterChain.doFilter(request, response);
