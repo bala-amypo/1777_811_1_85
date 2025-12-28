@@ -1,45 +1,31 @@
 package com.example.demo.security;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider,
-            CustomUserDetailsService customUserDetailsService
-    ) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.customUserDetailsService = customUserDetailsService;
+    public JwtAuthenticationFilter(JwtUtil jwtUtil,
+                                   UserDetailsService userDetailsService) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
-        String path = request.getRequestURI();
-
-// ⛔ Skip JWT validation for Swagger & public APIs
-if (path.startsWith("/swagger-ui")
-        || path.startsWith("/v3/api-docs")
-        || path.startsWith("/auth")
-        || path.startsWith("/properties")) {
-
-    filterChain.doFilter(request, response);
-    return;
-}
 
     @Override
     protected void doFilterInternal(
@@ -48,6 +34,18 @@ if (path.startsWith("/swagger-ui")
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        // ✅ SKIP JWT FOR PUBLIC ENDPOINTS
+        String path = request.getRequestURI();
+        if (path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/auth")
+                || path.startsWith("/properties")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 🔐 JWT VALIDATION
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -55,39 +53,31 @@ if (path.startsWith("/swagger-ui")
             return;
         }
 
-        String token = authHeader.substring(7);
+        String jwt = authHeader.substring(7);
+        Claims claims = jwtUtil.extractAllClaims(jwt);
+        String username = claims.getSubject();
 
-        if (!jwtTokenProvider.validateToken(token)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        String email = jwtTokenProvider.getEmailFromToken(token);
-        String role = jwtTokenProvider.getRoleFromToken(token);
-
-        if (email != null &&
+        if (username != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails =
-                    customUserDetailsService.loadUserByUsername(email);
+                    userDetailsService.loadUserByUsername(username);
 
-            List<SimpleGrantedAuthority> authorities =
-                    Collections.singletonList(
-                            new SimpleGrantedAuthority("ROLE_" + role)
-                    );
+            if (jwtUtil.isTokenValid(jwt, userDetails)) {
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            authorities
-                    );
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
 
         filterChain.doFilter(request, response);
