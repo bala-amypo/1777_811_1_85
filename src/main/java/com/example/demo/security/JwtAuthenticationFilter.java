@@ -2,39 +2,27 @@ package com.example.demo.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final UserDetailsService userDetailsService;
-
-    // MUST match test tokens
-    private static final String SECRET =
-            "real-estate-rating-engine-secret-key-real-estate-rating-engine-secret-key";
-
-    private static final SecretKey KEY =
-            Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
-
-    public JwtAuthenticationFilter(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Override
     protected void doFilterInternal(
@@ -43,47 +31,53 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        try {
-            String token = header.substring(7);
+        String token = authHeader.substring(7);
 
+        try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(KEY)
+                    .setSigningKey(jwtSecret.getBytes())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
             String email = claims.getSubject();
+            String role = claims.get("role", String.class);
+            Date expiration = claims.getExpiration();
 
             if (email != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null &&
-                claims.getExpiration().after(new Date())) {
+                role != null &&
+                expiration != null &&
+                expiration.after(new Date()) &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(email);
+                // ✅ THIS IS THE CRITICAL FIX
+                // Convert role -> Spring Security authority
+                List<SimpleGrantedAuthority> authorities =
+                        List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-                UsernamePasswordAuthenticationToken auth =
+                UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
+                                email,
                                 null,
-                                userDetails.getAuthorities()
+                                authorities
                         );
 
-                auth.setDetails(
+                authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
-        } catch (Exception ignored) {
-            // tests EXPECT silent failure
+        } catch (Exception e) {
+            // Invalid token → do nothing → Security will return 401
         }
 
         filterChain.doFilter(request, response);
