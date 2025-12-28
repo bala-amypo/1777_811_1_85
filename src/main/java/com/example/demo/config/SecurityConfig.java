@@ -1,3 +1,18 @@
+package com.example.demo.config;
+
+import com.example.demo.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -9,46 +24,41 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
+    http
+        .csrf(csrf -> csrf.disable())
 
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((req, res, ex1) ->
-                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                .accessDeniedHandler((req, res, ex1) ->
-                    res.sendError(HttpServletResponse.SC_FORBIDDEN))
+        .exceptionHandling(ex -> ex
+            .authenticationEntryPoint(
+                (request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
             )
-
-            .authorizeHttpRequests(auth -> auth
-                // ✅ Public
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/swagger-ui.html"
-                ).permitAll()
-
-                // 🔥 Role based API authorization
-                .requestMatchers(HttpMethod.POST, "/properties/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/properties/**").hasAnyRole("ADMIN", "ANALYST")
-
-                .requestMatchers("/scores/**").hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.POST, "/ratings/generate/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/ratings/**").hasAnyRole("ADMIN", "ANALYST")
-
-                .anyRequest().authenticated()
+            .accessDeniedHandler(
+                (request, response, accessDeniedException) ->
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden")
             )
+        )
 
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/auth/**").permitAll()
+            .requestMatchers(
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/swagger-ui.html"
+            ).permitAll()
+            .anyRequest().authenticated()
+        )
 
-            .httpBasic(httpBasic -> httpBasic.disable())
-            .formLogin(form -> form.disable());
+        // JWT filter
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-        return http.build();
-    }
+        // ❌ NO LOGIN PAGE
+        .httpBasic(httpBasic -> httpBasic.disable());
+
+    return http.build();
+}
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
