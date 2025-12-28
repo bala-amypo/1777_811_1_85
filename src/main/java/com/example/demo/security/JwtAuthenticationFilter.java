@@ -29,6 +29,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtTokenProvider = jwtTokenProvider;
         this.customUserDetailsService = customUserDetailsService;
     }
+        String path = request.getRequestURI();
+
+// ⛔ Skip JWT validation for Swagger & public APIs
+if (path.startsWith("/swagger-ui")
+        || path.startsWith("/v3/api-docs")
+        || path.startsWith("/auth")
+        || path.startsWith("/properties")) {
+
+    filterChain.doFilter(request, response);
+    return;
+}
 
     @Override
     protected void doFilterInternal(
