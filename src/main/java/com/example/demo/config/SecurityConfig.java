@@ -3,6 +3,8 @@ package com.example.demo.config;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,18 +29,17 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(auth -> auth
-                // ✅ Swagger accessible
+                // Swagger access
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html"
                 ).permitAll()
 
-                // ✅ AUTH endpoints
+                // Auth endpoints
                 .requestMatchers("/auth/**").permitAll()
 
-                // 🔥 MOST IMPORTANT LINE 🔥
-                // ✅ Allow ALL APIs (prevents 401)
+                // 🔥 ALLOW EVERYTHING (prevents 401)
                 .anyRequest().permitAll()
             )
 
@@ -49,6 +50,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // ✅ REQUIRED for AuthController
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    // ✅ REQUIRED for password hashing
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
