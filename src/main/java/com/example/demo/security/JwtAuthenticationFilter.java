@@ -1,28 +1,28 @@
-package com.example.demo.security;
+package com.example.demo.security; // ⚠️ change ONLY if your package is different
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -32,41 +32,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String username = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+        // Extract JWT token
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (Exception e) {
+                // Invalid token → ignore & continue filter chain
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
-        String token = authHeader.substring(7);
+        // Authenticate user if not already authenticated
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(jwtSecret.getBytes())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            String email = claims.getSubject();
-            String role = claims.get("role", String.class);
-            Date expiration = claims.getExpiration();
-
-            if (email != null &&
-                role != null &&
-                expiration != null &&
-                expiration.after(new Date()) &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // ✅ THIS IS THE CRITICAL FIX
-                // Convert role -> Spring Security authority
-                List<SimpleGrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            if (jwtUtil.validateToken(token, userDetails)) {
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                email,
+                                userDetails,
                                 null,
-                                authorities
+                                userDetails.getAuthorities()
                         );
 
                 authentication.setDetails(
@@ -75,9 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-
-        } catch (Exception e) {
-            // Invalid token → do nothing → Security will return 401
         }
 
         filterChain.doFilter(request, response);
