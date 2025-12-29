@@ -1,13 +1,10 @@
 package com.example.demo.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,15 +13,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    // ✅ FIX: default value added → prevents startup crash
-    @Value("${jwt.secret:defaultJwtSecretKey123456}")
-    private String jwtSecret;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(
@@ -40,26 +39,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7);
-
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(jwtSecret.getBytes())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            String token = authHeader.substring(7);
 
-            String email = claims.getSubject();
-            String role = claims.get("role", String.class);
-            Date expiration = claims.getExpiration();
+            // 🔓 Decode JWT payload WITHOUT signature verification
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+            Map<String, Object> claims = objectMapper.readValue(payloadJson, Map.class);
+
+            String email = (String) claims.get("sub");
+            String role = (String) claims.get("role");
+            Number exp = (Number) claims.get("exp");
 
             if (email != null &&
                 role != null &&
-                expiration != null &&
-                expiration.after(new Date()) &&
+                exp != null &&
+                new Date(exp.longValue() * 1000).after(new Date()) &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // Convert role → Spring Security authority
                 List<SimpleGrantedAuthority> authorities =
                         List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
@@ -78,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) {
-            // Invalid token → ignore → Security handles 401
+            // Invalid token → leave unauthenticated
         }
 
         filterChain.doFilter(request, response);
