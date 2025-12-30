@@ -31,7 +31,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 // Server configuration (your existing config preserved)
                 .servers(List.of(
-                        new Server().url("https://9362.pro604cr.amypo.ai/")
+                        new Server().url("https://9362.pro604cr.amypo.a/")
                 ))
 
                 // Register security scheme
