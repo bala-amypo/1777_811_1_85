@@ -1,83 +1,31 @@
-package com.example.demo.entity;
+package com.example.demo.controller;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import com.example.demo.entity.RatingLog;
+import com.example.demo.service.RatingLogService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-@Entity
-@Table(
-        name = "facility_scores",
-        uniqueConstraints = @UniqueConstraint(columnNames = "property_id")
-)
-public class FacilityScore {
+import java.util.List;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@RestController
+@RequestMapping("/logs")
+public class RatingLogController {
 
-    @OneToOne
-    @JoinColumn(name = "property_id", nullable = false)
-    private Property property;
+    @Autowired
+    private RatingLogService ratingLogService;
 
-    @Min(0) @Max(10)
-    private int schoolProximity;
+    @PostMapping("/{propertyId}")
+    public ResponseEntity<RatingLog> addLog(
+            @PathVariable Long propertyId,
+            @RequestParam String message) {
 
-    @Min(0) @Max(10)
-    private int hospitalProximity;
-
-    @Min(0) @Max(10)
-    private int transportAccess;
-
-    @Min(0) @Max(10)
-    private int safetyScore;
-
-    // ===== Getters & Setters =====
-
-    public Long getId() {
-        return id;
+        RatingLog log = ratingLogService.addLog(propertyId, message);
+        return new ResponseEntity<>(log, HttpStatus.CREATED);
     }
 
-    public Property getProperty() {
-        return property;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setProperty(Property property) {
-        this.property = property;
-    }
-
-    public int getSchoolProximity() {
-        return schoolProximity;
-    }
-
-    public void setSchoolProximity(int schoolProximity) {
-        this.schoolProximity = schoolProximity;
-    }
-
-    public int getHospitalProximity() {
-        return hospitalProximity;
-    }
-
-    public void setHospitalProximity(int hospitalProximity) {
-        this.hospitalProximity = hospitalProximity;
-    }
-
-    public int getTransportAccess() {
-        return transportAccess;
-    }
-
-    public void setTransportAccess(int transportAccess) {
-        this.transportAccess = transportAccess;
-    }
-
-    public int getSafetyScore() {
-        return safetyScore;
-    }
-
-    public void setSafetyScore(int safetyScore) {
-        this.safetyScore = safetyScore;
+    @GetMapping("/{propertyId}")
+    public ResponseEntity<List<RatingLog>> getLogs(@PathVariable Long propertyId) {
+        return ResponseEntity.ok(ratingLogService.getLogsByProperty(propertyId));
     }
 }
